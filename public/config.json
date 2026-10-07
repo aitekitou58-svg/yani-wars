@@ -1,6 +1,20 @@
 {
   "lifeMinutesPerStick": 20,
   "defaultFreeMinutes": 5,
-  "milestones": [10, 50, 100, 500, 1000],
-  "publicUrl": ""
+  "milestones": [
+    10,
+    50,
+    100,
+    500,
+    1000
+  ],
+  "publicUrl": "",
+  "adsense": {
+    "enabled": false,
+    "consentConfigured": false,
+    "clientId": "",
+    "slotRecord": "",
+    "slotInfo": "",
+    "hostUrl": ""
+  }
 }
