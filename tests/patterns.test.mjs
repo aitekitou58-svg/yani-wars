@@ -49,3 +49,16 @@ test('ads require production, HTTPS, valid IDs, configured consent and valid ban
   assert.equal(adSettings(config,'slotRecord',loc,false),null);
   for(const patch of [{enabled:false},{consentConfigured:false},{clientId:''},{slotRecord:''}]) assert.equal(adSettings({adsense:{...config.adsense,...patch}},'slotRecord',loc,true),null);
 });
+
+test('ownership verification is independent of ad slots and excluded from development', async () => {
+  const {adsenseHead}=await import('../scripts/adsense-head.mjs');
+  const config={adsense:{clientId:'ca-pub-8745360624658964',siteVerification:true,enabled:false}};
+  assert.equal(adsenseHead(config,false),'');
+  assert.equal(adsenseHead({adsense:{...config.adsense,siteVerification:false}},true),'');
+  assert.equal(adsenseHead({adsense:{...config.adsense,clientId:'invalid'}},true),'');
+  const head=adsenseHead(config,true);
+  assert.match(head,/google-adsense-account/);
+  assert.match(head,/client=ca-pub-8745360624658964/);
+  assert.match(head,/location.hostname === 'yaniwars.pages.dev'/);
+  assert.doesNotMatch(head,/localStorage|indexedDB|events|settings|adSlot|push\(/);
+});
