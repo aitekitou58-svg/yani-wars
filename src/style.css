@@ -269,7 +269,7 @@ p {
 }
 .share-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: max-content;
   gap: 16px;
   margin: 18px 0 4px;
 }
@@ -837,8 +837,6 @@ dialog a {
 .article p { margin: 16px 0; }
 .intro { overflow-wrap: anywhere; text-wrap: pretty; }
 
-.import-records {display:block;margin:24px 0;font-size:13px;}
-.import-records input {display:block;max-width:100%;font-size:12px;margin-top:10px;}
 
 :is(#home-banner,#record-banner).advert { margin:0; padding:12px 0; overflow:hidden; }
 :is(#home-banner,#record-banner)[hidden] { display:none; }

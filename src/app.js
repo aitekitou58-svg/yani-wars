@@ -1,6 +1,5 @@
 import { positionHomeAd } from "./ads.js";
 import { production } from "./build-mode.js";
-import { mergeRecords } from "./transfer.js";
 import { hourlyPattern } from "./patterns.js";
 import {
   dayKey,
@@ -86,7 +85,7 @@ function render() {
   }
   const total = totals(state.events),
     today = totals(state.events, "today");
-  app.innerHTML = `<div class="shell">${header()}<main>${view === "home" ? `<section class="home"><div class="heading"><p class="eyebrow">ONE LESS. MORE LIFE.</p><h1>お前には、<br>もう奪わせない。</h1><p class="quiet">${launchMessage || "その1本から、取り戻そう。"}</p></div>${scene()}<div class="count-line"><span>今日守った <strong id="today-count">${today.count}</strong> 本</span><span>累計 <b>${total.count}</b> 本</span></div><div class="action-area"><button class="save-button" id="save">吸わなかった！<span aria-hidden="true">＋</span></button><button class="smoked" id="smoked">吸った</button></div><section class="reclaimed" aria-label="累計の成果">${stats(total)}</section><div class="share-actions" role="group" aria-label="成果をシェア"><button class="share-link" data-action="share"><span>今日の成果をシェア</span><span aria-hidden="true">↗</span></button><button class="share-link" data-action="share-all"><span>今までの成果をシェア</span><span aria-hidden="true">↗</span></button></div><p class="world-copy">奪われていたものを取り戻すほど、<br>世界に色が戻る。</p><div id="home-ad-anchor"></div></section>` : view === "history" ? history() : settings()}</main>${nav()}</div>`;
+  app.innerHTML = `<div class="shell">${header()}<main>${view === "home" ? `<section class="home"><div class="heading"><p class="eyebrow">ONE LESS. MORE LIFE.</p><h1>お前には、<br>もう奪わせない。</h1><p class="quiet">${launchMessage || "その1本から、取り戻そう。"}</p></div>${scene()}<div class="count-line"><span>今日守った <strong id="today-count">${today.count}</strong> 本</span><span>累計 <b>${total.count}</b> 本</span></div><div class="action-area"><button class="save-button" id="save">吸わなかった！<span aria-hidden="true">＋</span></button><button class="smoked" id="smoked">吸った</button></div><section class="reclaimed" aria-label="累計の成果">${stats(total)}</section><div class="share-actions" role="group" aria-label="成果をシェア"><button class="share-link" data-action="share"><span>今日の成果をシェア</span><span aria-hidden="true">↗</span></button></div><p class="world-copy">奪われていたものを取り戻すほど、<br>世界に色が戻る。</p><div id="home-ad-anchor"></div></section>` : view === "history" ? history() : settings()}</main>${nav()}</div>`;
   bind();
   positionHomeAd(config, production);
 }
@@ -131,26 +130,7 @@ function settings() {
     )
     .join(
       "",
-    )}${importControl()}${publicLinks()}<button class="delete" id="delete">すべての記録を削除</button><p class="footnote">ヤニウォーズ v1.0<br>お前には、もう奪わせない。</p></section>`;
-}
-function importControl() { return '<label class="import-records">保存した記録を読み込む<input id="import-records" type="file" accept="application/json,.json"></label>'; }
-function bindImport() {
-  const input = $('#import-records');
-  if (!input) return;
-  input.onchange = async () => {
-    try {
-      const file = input.files[0]; if (!file) return;
-      if (file.size > 20 * 1024 * 1024) throw Error('20MB以下の記録ファイルを選んでください');
-      const incoming = JSON.parse(await file.text());
-      const next = mergeRecords(state, incoming);
-      modal(`<h2>記録を引き継ぐ</h2><p>${next.events.length - state.events.length}件を追加します。同じ記録は重複させません。現在の記録と設定は残ります。ファイルは外部へ送信しません。</p><button id="confirm-import" class="save-button">読み込む</button>`);
-      $('#confirm-import').onclick = async () => {
-        await commit(s => mergeRecords(s, incoming));
-        dialog.close();
-      };
-    } catch (e) { notify(e.message); }
-    input.value = '';
-  };
+    )}${publicLinks()}<button class="delete" id="delete">すべての記録を削除</button><p class="footnote">ヤニウォーズ v1.0<br>お前には、もう奪わせない。</p></section>`;
 }
 function publicLinks() {
   return `<nav class="public-links" aria-label="アプリの説明"><a href="./about/">このアプリについて</a><a href="./guide/">使い方</a><a href="./life/">寿命換算について</a><a href="./patterns/">時間帯統計について</a><a href="./privacy/">プライバシーポリシー</a><a href="./advertising/">広告について</a></nav>`;
@@ -173,9 +153,8 @@ function productPicker() {
     )}</div><div id="products" class="products"></div><details class="manual"><summary>一覧にない銘柄を入力</summary><label>商品名<input id="manual-name" maxlength="100" placeholder="商品名"></label><div class="two-fields"><label>箱価格（円）<input id="manual-price" type="number" min="1" max="100000"></label><label>入り数<input id="manual-count" type="number" min="1" max="1000" value="20"></label></div><button id="manual-select" class="text-button">この銘柄を選ぶ</button></details><div id="selection" class="selection"></div><p class="footnote">銘柄情報は節約額計算のために使用しています。購入・利用を推奨するものではありません。<br>公式資料で確認した商品を掲載。一部未掲載・販売状況未確認の商品があります。価格確認：${escape(catalog.checkedAt || "商品ごとの情報を参照")}</p>`;
 }
 function onboarding() {
-  app.innerHTML = `<div class="shell onboarding">${header()}<main><p class="eyebrow">WELCOME TO YOUR WORLD</p><h1>世界を、<br>取り戻そう。</h1><p class="intro">吸いたいと思った。でも、吸わなかった。<br>その1回から、お金も、時間も、そして命も。</p><section><p class="step">01 <span>吸っている銘柄</span></p>${productPicker()}</section><section><p class="step">02 <span>どんな言葉で、一緒に進む？</span></p><div class="tone-choices"><button data-tone="tease" aria-pressed="${tone === "tease"}"><b>煽る</b><span>「その1本、本当にいる？」</span></button><button data-tone="praise" aria-pressed="${tone === "praise"}"><b>褒める</b><span>「次の1本も取り戻そう。」</span></button></div></section><button class="save-button start" id="start" ${selected ? "" : "disabled"}>ヤニウォーズを始める <span>→</span></button><p class="footnote">登録不要。記録は、この端末の中だけに。</p>${importControl()}${publicLinks()}</main></div>`;
+  app.innerHTML = `<div class="shell onboarding">${header()}<main><p class="eyebrow">WELCOME TO YOUR WORLD</p><h1>世界を、<br>取り戻そう。</h1><p class="intro">吸いたいと思った。でも、吸わなかった。<br>その1回から、お金も、時間も、そして命も。</p><section><p class="step">01 <span>吸っている銘柄</span></p>${productPicker()}</section><section><p class="step">02 <span>どんな言葉で、一緒に進む？</span></p><div class="tone-choices"><button data-tone="tease" aria-pressed="${tone === "tease"}"><b>煽る</b><span>「その1本、本当にいる？」</span></button><button data-tone="praise" aria-pressed="${tone === "praise"}"><b>褒める</b><span>「次の1本も取り戻そう。」</span></button></div></section><button class="save-button start" id="start" ${selected ? "" : "disabled"}>ヤニウォーズを始める <span>→</span></button><p class="footnote">登録不要。記録は、この端末の中だけに。</p>${publicLinks()}</main></div>`;
   bindPicker();
-  bindImport();
   document.querySelectorAll("[data-tone]").forEach(
     (b) =>
       (b.onclick = () => {
@@ -308,7 +287,6 @@ async function commitNow(fn) {
   }
 }
 function bind() {
-  bindImport();
   document.querySelectorAll('[data-hour]').forEach(b => b.onclick = () => {
     $('#hour-detail').textContent = b.getAttribute('aria-label');
     document.querySelectorAll('[data-hour]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
@@ -484,7 +462,6 @@ function action(name) {
       "<h2>ホーム画面へ。</h2><p>iPhone：Safariで開き、共有メニューから「ホーム画面に追加」を選択。</p><p>Android：Chromeのメニューから「ホーム画面に追加」または「アプリをインストール」。</p><p>最初にオンラインで開いた後は、ホーム画面からオフラインでも記録できます。HTTPSで公開されたURLでお使いください。</p>",
     );
   if (name === "share") share("today");
-  if (name === "share-all") share("all");
 }
 async function copyShareText(text) {
   try {
@@ -499,7 +476,7 @@ async function copyShareText(text) {
     notify("表示された文章を選択してコピーしてください");
   }
 }
-async function share(initialPeriod = "today") {
+async function share() {
   const publicUrl = publicShareUrl(
     config.publicUrl,
     new URL("../", import.meta.url).href,
@@ -512,10 +489,6 @@ async function share(initialPeriod = "today") {
     generation = 0,
     ready = false;
   modal(`<h2 id="share-heading">今日、取り戻したもの。</h2>
-    <div class="tabs share-periods" role="group" aria-label="シェアする期間">
-      <button data-share-period="today" aria-pressed="true">今日</button>
-      <button data-share-period="all" aria-pressed="false">累計</button>
-    </div>
     <img class="share-preview" alt="シェア画像を準備しています" hidden>
     <button class="save-button" id="share-file" disabled>画像とリンクをシェア <span>↗</span></button>
     <div class="share-options">
@@ -538,14 +511,6 @@ async function share(initialPeriod = "today") {
   const updatePreview = async (period) => {
     ready = false;
     const token = ++generation;
-    document
-      .querySelectorAll("[data-share-period]")
-      .forEach((b) =>
-        b.setAttribute(
-          "aria-pressed",
-          String(b.dataset.sharePeriod === period),
-        ),
-      );
     [
       "#share-file",
       "#share-download",
@@ -585,9 +550,6 @@ async function share(initialPeriod = "today") {
       if (token === generation) notify(e.message);
     }
   };
-  document
-    .querySelectorAll("[data-share-period]")
-    .forEach((b) => (b.onclick = () => updatePreview(b.dataset.sharePeriod)));
   $("#share-download").onclick = () => {
     if (ready) download(blob, file.name);
   };
@@ -621,7 +583,7 @@ async function share(initialPeriod = "today") {
       notify("画像を保存しました。投稿文とURLはコピーボタンから使えます");
     }
   };
-  await updatePreview(initialPeriod);
+  await updatePreview("today");
 }
 
 async function start() {
