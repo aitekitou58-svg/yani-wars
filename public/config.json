@@ -12,10 +12,11 @@
   "adsense": {
     "enabled": false,
     "consentConfigured": false,
-    "clientId": "",
+    "clientId": "ca-pub-8745360624658964",
     "slotRecord": "",
     "slotInfo": "",
     "hostUrl": "",
-    "slotHome": ""
+    "slotHome": "",
+    "siteVerification": true
   }
 }
