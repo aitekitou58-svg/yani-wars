@@ -80,7 +80,7 @@ async function prepare(
   await expect(page.locator("#share-file")).toBeEnabled();
 }
 
-test("today/cumulative image, native sharing, X composer and copy carry the public link", async ({
+test("today image, native sharing, X composer and copy carry the public link", async ({
   page,
 }) => {
   await prepare(page);
@@ -88,49 +88,27 @@ test("today/cumulative image, native sharing, X composer and copy carry the publ
     "alt",
     /今日の成果：1本/,
   );
-  await page.locator('[data-share-period="all"]').click();
-  await expect(page.locator(".share-preview")).toHaveAttribute(
-    "alt",
-    /累計の成果：2本/,
-  );
+  await expect(page.locator("[data-share-period]")).toHaveCount(0);
   await page.locator("#share-file").click();
   const data = await page.evaluate(() => window.shared[0]);
   expect(data.url).toBe("https://yani.example.org/app/");
-  expect(data.text).toContain("累計2本");
-  expect(data.files[0].name).toBe("yani-wars-all.png");
+  expect(data.text).toContain("今日1本");
+  expect(data.files[0].name).toBe("yani-wars-today.png");
   expect(data.files[0].type).toBe("image/png");
   await page.locator("#share-copy-url").click();
   await page.locator("#share-copy-caption").click();
   const copied = await page.evaluate(() => window.copied);
   expect(copied[0]).toBe(data.url);
-  expect(copied[1]).toContain("累計2本");
+  expect(copied[1]).toContain("今日1本");
   expect(copied[1]).toContain(data.url);
   await page.locator("#share-x").click();
   const intent = new URL(await page.evaluate(() => window.opened[0]));
   expect(intent.searchParams.get("url")).toBe(data.url);
   expect(intent.searchParams.get("text")).toBe(data.text);
   await page.getByRole("button", { name: "閉じる" }).click();
-  const todayButton = page.getByRole("button", {
-    name: "今日の成果をシェア",
-    exact: true,
-  });
-  const allButton = page.getByRole("button", {
-    name: "今までの成果をシェア",
-    exact: true,
-  });
-  const todayBox = await todayButton.boundingBox(),
-    allBox = await allButton.boundingBox();
-  expect(Math.abs(todayBox.y - allBox.y)).toBeLessThan(2);
-  expect(allBox.x).toBeGreaterThan(todayBox.x);
-  await allButton.click();
-  await expect(page.locator('[data-share-period="all"]')).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
-  await expect(page.locator(".share-preview")).toHaveAttribute(
-    "alt",
-    /累計の成果：2本/,
-  );
+  await expect(page.getByRole("button", { name: "今までの成果をシェア", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "今日の成果をシェア", exact: true }).click();
+  await expect(page.locator(".share-preview")).toHaveAttribute("alt", /今日の成果：1本/);
   await page.screenshot({
     path: `test-results/share-${test.info().project.name}.png`,
     fullPage: true,

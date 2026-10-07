@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test("month-equivalent landscape grows, persists, and appears in cumulative sharing", async ({
+test("month-equivalent landscape grows, persists, and appears in today sharing", async ({
   page,
 }) => {
   await setup(page);
@@ -27,11 +27,11 @@ test("month-equivalent landscape grows, persists, and appears in cumulative shar
       .evaluateAll((nodes) => nodes.map((n) => Number(n.dataset.growth))),
   ).toEqual(growth);
   await page
-    .getByRole("button", { name: "今までの成果をシェア", exact: true })
+    .getByRole("button", { name: "今日の成果をシェア", exact: true })
     .click();
   await expect(page.locator(".share-preview")).toHaveAttribute(
     "alt",
-    /累計の成果：1800本/,
+    /今日の成果：1800本/,
   );
   await expect(page.locator(".share-preview")).toHaveJSProperty(
     "naturalWidth",

@@ -61,11 +61,13 @@ test('sharing uses exact same full SVG for both low and high recovery',async({pa
     await page.locator('.close').click();
   }
 });
-test('record import safely merges a previous installation without changing gains',async({page})=>{
+test('removed import controls stay absent and existing records survive settings and reload',async({page})=>{
+  await page.goto('/');await expect(page.locator('#start')).toBeVisible();
+  await expect(page.locator('input[type=file]')).toHaveCount(0);
   await setup(page);await page.locator('#save').click();await expect(page.locator('#today-count')).toHaveText('1');
-  const data=await page.evaluate(async()=>{const {read}=await import('/src/storage.js');const s=await read();s.events.push({...s.events[0],id:'import-test',unitPrice:31,freeMinutes:7});return s;});
   await page.locator('[data-view=settings]').click();
-  await page.locator('#import-records').setInputFiles({name:'records.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});
-  await page.locator('#confirm-import').click();await page.locator('[data-view=home]').click();
-  await expect(page.locator('#today-count')).toHaveText('2');
+  await expect(page.locator('input[type=file]')).toHaveCount(0);
+  await expect(page.getByText('保存した記録を読み込む',{exact:true})).toHaveCount(0);
+  await page.locator('[data-view=home]').click();await page.reload();
+  await expect(page.locator('#today-count')).toHaveText('1');
 });
