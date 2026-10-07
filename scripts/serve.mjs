@@ -4,6 +4,7 @@ import path from "node:path";
 const root = path.resolve("dist"),
   port = Number(process.env.PORT || 4173);
 const mime = {
+  ".txt": "text/plain; charset=utf-8",
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8",
