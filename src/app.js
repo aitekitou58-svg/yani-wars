@@ -1,3 +1,7 @@
+import { mergeRecords } from "./transfer.js";
+import { hourlyPattern } from "./patterns.js";
+import { mountAd } from "./ads.js";
+import { production } from "./build-mode.js";
 import {
   dayKey,
   totals,
@@ -83,6 +87,11 @@ function render() {
     today = totals(state.events, "today");
   app.innerHTML = `<div class="shell">${header()}<main>${view === "home" ? `<section class="home"><div class="heading"><p class="eyebrow">ONE LESS. MORE LIFE.</p><h1>お前には、<br>もう奪わせない。</h1><p class="quiet">${launchMessage || "その1本から、取り戻そう。"}</p></div>${scene()}<div class="count-line"><span>今日守った <strong id="today-count">${today.count}</strong> 本</span><span>累計 <b>${total.count}</b> 本</span></div><div class="action-area"><button class="save-button" id="save">吸わなかった！<span aria-hidden="true">＋</span></button><button class="smoked" id="smoked">吸った</button></div><section class="reclaimed" aria-label="累計の成果">${stats(total)}</section><div class="share-actions" role="group" aria-label="成果をシェア"><button class="share-link" data-action="share"><span>今日の成果をシェア</span><span aria-hidden="true">↗</span></button><button class="share-link" data-action="share-all"><span>今までの成果をシェア</span><span aria-hidden="true">↗</span></button></div><p class="world-copy">奪われていたものを取り戻すほど、<br>世界に色が戻る。</p></section>` : view === "history" ? history() : settings()}</main>${nav()}</div>`;
   bind();
+  mountAd($("#record-ad"), config, "slotRecord", production);
+}
+function patternChart() {
+  const p = hourlyPattern(state.events, period), max = Math.max(1, ...p.hours);
+  return `<section class="patterns" aria-labelledby="pattern-heading"><h2 id="pattern-heading">吸いたくなる時間</h2><p class="quiet">吸った・吸わなかった、どちらも含む ${p.total}回の記録</p><div class="histogram" role="group" aria-label="時間帯別の記録数">${p.hours.map((n, h) => `<button data-hour="${h}" aria-label="${h}時台 ${n}回" style="--bar-height:${n / max * 100}%;--bar-opacity:${.35 + .65 * n / max}"><span></span></button>`).join('')}</div><div class="hour-axis" aria-hidden="true">${[0,3,6,9,12,15,18,21,24].map(h => `<span>${h}</span>`).join('')}</div><p id="hour-detail" role="status" class="footnote">棒に触れると、その時間の回数が見えます。</p><p class="peak-label">よく吸いたくなる時間<strong>${p.summary}</strong></p><p class="footnote">記録した時間の傾向です。実際の欲求や喫煙量を判定するものではありません。</p></section>`;
 }
 function history() {
   const t = totals(state.events, period);
@@ -97,7 +106,7 @@ function history() {
     )
     .join(
       "",
-    )}</div><p class="record-count"><strong>${t.count}</strong> 本を守った</p>${stats(t)}<h2>最近の記録</h2><div class="event-list">${
+    )}</div><p class="record-count"><strong>${t.count}</strong> 本を守った</p>${stats(t)}${patternChart()}<h2>最近の記録</h2><div class="event-list">${
     state.events
       .slice(-30)
       .reverse()
@@ -107,7 +116,7 @@ function history() {
       )
       .join("") ||
     '<p class="quiet">最初の1本から、ここに積み重なっていきます。</p>'
-  }</div><p class="footnote">今週は月曜日から。日付は記録時の端末の現地日付です。表示は直近30件、集計はすべての記録を含みます。</p></section>`;
+  }</div><p class="footnote">今週は月曜日から。日付は記録時の端末の現地日付です。表示は直近30件、集計は選択した期間の全記録を含みます。</p><div id="record-ad"></div></section>`;
 }
 function settings() {
   return `<section class="page"><p class="eyebrow">YOUR OWN PACE</p><h1>あなたのペースで。</h1><div class="setting-row"><span>吸っている銘柄</span><button id="change-product">${escape(state.settings.product.name)} <span>›</span></button><small>現在 1本 ${yen(priceAt(state.settings.product))}円</small></div><div class="setting-row"><label for="tone">アプリの語り口</label><select id="tone"><option value="praise" ${state.settings.tone === "praise" ? "selected" : ""}>褒める</option><option value="tease" ${state.settings.tone === "tease" ? "selected" : ""}>煽る</option></select></div><div class="setting-row"><label for="minutes">1本の喫煙時間（分）</label><div class="minute-options">${[3, 5, 7, 10].map((n) => `<button data-minutes="${n}" aria-pressed="${state.settings.freeMinutes === n}">${n}分</button>`).join("")}</div><form id="time-form"><input id="minutes" type="number" min="1" max="120" step="1" required value="${state.settings.freeMinutes}" aria-label="自由入力（分）"><button class="text-button">保存</button></form><small>変更は次の記録から適用。過去の金額・寿命換算・時間は変わりません。</small></div><div class="setting-row"><h2>データ状態</h2><p>記録 ${state.events.length}件 · この端末に保存</p><small>${escape(storageStatus.backup)}<br>保存領域の保護：${storageStatus.persistent ? "有効" : "ブラウザの管理に従います"}</small><button class="text-button" id="export">記録をファイルに保存</button><small>自動バックアップも同じ端末内です。端末紛失・ブラウザのデータ消去からは復元できません。</small></div>${[
@@ -121,7 +130,29 @@ function settings() {
     )
     .join(
       "",
-    )}<button class="delete" id="delete">すべての記録を削除</button><p class="footnote">ヤニウォーズ v1.0<br>お前には、もう奪わせない。</p></section>`;
+    )}${importControl()}${publicLinks()}<button class="delete" id="delete">すべての記録を削除</button><p class="footnote">ヤニウォーズ v1.0<br>お前には、もう奪わせない。</p></section>`;
+}
+function importControl() { return '<label class="import-records">保存した記録を読み込む<input id="import-records" type="file" accept="application/json,.json"></label>'; }
+function bindImport() {
+  const input = $('#import-records');
+  if (!input) return;
+  input.onchange = async () => {
+    try {
+      const file = input.files[0]; if (!file) return;
+      if (file.size > 20 * 1024 * 1024) throw Error('20MB以下の記録ファイルを選んでください');
+      const incoming = JSON.parse(await file.text());
+      const next = mergeRecords(state, incoming);
+      modal(`<h2>記録を引き継ぐ</h2><p>${next.events.length - state.events.length}件を追加します。同じ記録は重複させません。現在の記録と設定は残ります。ファイルは外部へ送信しません。</p><button id="confirm-import" class="save-button">読み込む</button>`);
+      $('#confirm-import').onclick = async () => {
+        await commit(s => mergeRecords(s, incoming));
+        dialog.close();
+      };
+    } catch (e) { notify(e.message); }
+    input.value = '';
+  };
+}
+function publicLinks() {
+  return `<nav class="public-links" aria-label="アプリの説明"><a href="./about/">このアプリについて</a><a href="./guide/">使い方</a><a href="./life/">寿命換算について</a><a href="./patterns/">時間帯統計について</a><a href="./privacy/">プライバシーポリシー</a><a href="./advertising/">広告について</a></nav>`;
 }
 function productPicker() {
   return `<label class="search-label" for="search">銘柄を検索</label><input id="search" type="search" placeholder="メビウス、テリア、ケント…" autocomplete="off"><div class="filters">${[
@@ -138,11 +169,12 @@ function productPicker() {
     )
     .join(
       "",
-    )}</div><div id="products" class="products"></div><details class="manual"><summary>一覧にない銘柄を入力</summary><label>商品名<input id="manual-name" maxlength="100" placeholder="商品名"></label><div class="two-fields"><label>箱価格（円）<input id="manual-price" type="number" min="1" max="100000"></label><label>入り数<input id="manual-count" type="number" min="1" max="1000" value="20"></label></div><button id="manual-select" class="text-button">この銘柄を選ぶ</button></details><div id="selection" class="selection"></div><p class="footnote">公式資料で確認した商品を掲載。一部未掲載・販売状況未確認の商品があります。価格確認：${escape(catalog.checkedAt || "商品ごとの情報を参照")}</p>`;
+    )}</div><div id="products" class="products"></div><details class="manual"><summary>一覧にない銘柄を入力</summary><label>商品名<input id="manual-name" maxlength="100" placeholder="商品名"></label><div class="two-fields"><label>箱価格（円）<input id="manual-price" type="number" min="1" max="100000"></label><label>入り数<input id="manual-count" type="number" min="1" max="1000" value="20"></label></div><button id="manual-select" class="text-button">この銘柄を選ぶ</button></details><div id="selection" class="selection"></div><p class="footnote">銘柄情報は節約額計算のために使用しています。購入・利用を推奨するものではありません。<br>公式資料で確認した商品を掲載。一部未掲載・販売状況未確認の商品があります。価格確認：${escape(catalog.checkedAt || "商品ごとの情報を参照")}</p>`;
 }
 function onboarding() {
-  app.innerHTML = `<div class="shell onboarding">${header()}<main><p class="eyebrow">WELCOME TO YOUR WORLD</p><h1>世界を、<br>取り戻そう。</h1><p class="intro">吸いたいと思った。でも、吸わなかった。<br>その1回から、お金も、時間も、色も。</p><section><p class="step">01 <span>吸っている銘柄</span></p>${productPicker()}</section><section><p class="step">02 <span>どんな言葉で、一緒に進む？</span></p><div class="tone-choices"><button data-tone="tease" aria-pressed="${tone === "tease"}"><b>煽る</b><span>「その1本、本当にいる？」</span></button><button data-tone="praise" aria-pressed="${tone === "praise"}"><b>褒める</b><span>「次の1本も取り戻そう。」</span></button></div></section><button class="save-button start" id="start" ${selected ? "" : "disabled"}>ヤニウォーズを始める <span>→</span></button><p class="footnote">登録不要。記録は、この端末の中だけに。</p></main></div>`;
+  app.innerHTML = `<div class="shell onboarding">${header()}<main><p class="eyebrow">WELCOME TO YOUR WORLD</p><h1>世界を、<br>取り戻そう。</h1><p class="intro">吸いたいと思った。でも、吸わなかった。<br>その1回から、お金も、時間も、そして命も。</p><section><p class="step">01 <span>吸っている銘柄</span></p>${productPicker()}</section><section><p class="step">02 <span>どんな言葉で、一緒に進む？</span></p><div class="tone-choices"><button data-tone="tease" aria-pressed="${tone === "tease"}"><b>煽る</b><span>「その1本、本当にいる？」</span></button><button data-tone="praise" aria-pressed="${tone === "praise"}"><b>褒める</b><span>「次の1本も取り戻そう。」</span></button></div></section><button class="save-button start" id="start" ${selected ? "" : "disabled"}>ヤニウォーズを始める <span>→</span></button><p class="footnote">登録不要。記録は、この端末の中だけに。</p>${importControl()}${publicLinks()}</main></div>`;
   bindPicker();
+  bindImport();
   document.querySelectorAll("[data-tone]").forEach(
     (b) =>
       (b.onclick = () => {
@@ -186,7 +218,7 @@ function listProducts() {
               p.type !== "紙巻き"
             : p.category === category)) &&
       normalize(
-        `${p.name} ${p.manufacturer} ${p.category} ${(p.aliases || []).join(" ")}`,
+        `${p.name} ${p.nameJa || ""} ${p.nameEn || ""} ${p.importer || ""} ${p.manufacturer} ${p.category} ${(p.aliases || []).join(" ")}`,
       ).includes(q),
   );
   $("#products").innerHTML =
@@ -275,6 +307,11 @@ async function commitNow(fn) {
   }
 }
 function bind() {
+  bindImport();
+  document.querySelectorAll('[data-hour]').forEach(b => b.onclick = () => {
+    $('#hour-detail').textContent = b.getAttribute('aria-label');
+    document.querySelectorAll('[data-hour]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  });
   document.querySelectorAll("[data-view]").forEach(
     (b) =>
       (b.onclick = () => {
@@ -439,7 +476,7 @@ function action(name) {
     );
   if (name === "privacy")
     modal(
-      '<p class="eyebrow">ONLY ON YOUR DEVICE</p><h2>記録は、あなたのもの。</h2><p>氏名・メール・位置情報は取得しません。アカウント、広告、アクセス解析、外部AIも使用しません。</p><p>銘柄、喫煙時刻、成果、設定は端末内に保存します。ユーザー共通の商品マスターとアプリの静的ファイルのみ通信で取得します。通常の配信に伴い、ホスティング事業者がIPアドレスなどを処理する場合があります。</p><p>シェア画像は端末内で生成。銘柄や喫煙時刻は含めません。共有先を選んだ場合のみ、そのアプリへ画像を渡します。</p>',
+      '<p class="eyebrow">ONLY ON YOUR DEVICE</p><h2>記録は、あなたのもの。</h2><p>ヤニウォーズ運営者は、喫煙記録・選択銘柄・利用履歴などのユーザーデータを収集しません。アカウント、アクセス解析、外部AIは使用しません。広告を有効にした場合、広告配信にはGoogle AdSenseの広告技術が使用されます。現在は広告ID未設定のため広告を配信していません。</p><p>銘柄、喫煙時刻、成果、設定は端末内に保存します。ユーザー共通の商品マスターとアプリの静的ファイルのみ通信で取得します。通常の配信に伴い、ホスティング事業者がIPアドレスなどを処理する場合があります。</p><p>シェア画像は端末内で生成。銘柄や喫煙時刻は含めません。共有先を選んだ場合のみ、そのアプリへ画像を渡します。</p><p><a href="./privacy/">プライバシーポリシー全文</a></p>',
     );
   if (name === "install")
     modal(

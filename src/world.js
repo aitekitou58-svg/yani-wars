@@ -11,9 +11,10 @@ export const WORLD_TIMELINE = Object.freeze([
   { days: 1, color: 0.22 },
   { days: 2, color: 0.36 },
   { days: 3, color: 0.48 },
-  { days: 14, color: 0.9 },
-  { days: 30, color: 0.92 },
-  { days: 90, color: 0.95 },
+  { days: 14, color: 0.82 },
+  { days: 25, color: 0.92 },
+  { days: 30, color: 0.93 },
+  { days: 90, color: 0.96 },
   { days: 270, color: 0.985 },
 ]);
 export const worldDays = (n) =>

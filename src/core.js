@@ -58,6 +58,7 @@ export function makeEvent(type, settings, config, now = new Date()) {
     type,
     at: now.toISOString(),
     day: dayKey(now),
+    hour: now.getHours(),
     ...(type === "saved"
       ? {
           productId: settings.product.id,
@@ -123,13 +124,13 @@ export function duration(n) {
 export function craving(events, now = new Date()) {
   const past = events.filter((e) => Date.parse(e.at) <= +now);
   if (!past.length) return false;
-  const last = [...past].reverse().find((e) => e.type === "smoked");
+  const last = [...past].sort((a,b) => Date.parse(b.at)-Date.parse(a.at)).find((e) => e.type === "smoked");
   const gap = last ? (+now - Date.parse(last.at)) / 60000 : Infinity;
   if (past.length < 12) return gap >= 55 && gap <= 100;
-  const recent = past.slice(-120);
+  const recent = [...past].sort((a,b) => Date.parse(a.at)-Date.parse(b.at)).slice(-120);
   const hour = now.getHours();
   const same = recent.filter(
-    (e) => Math.abs(new Date(e.at).getHours() - hour) <= 1,
+    (e) => Math.min(Math.abs((e.hour ?? new Date(e.at).getHours()) - hour), 24 - Math.abs((e.hour ?? new Date(e.at).getHours()) - hour)) <= 1,
   );
   const weekday = same.filter((e) => new Date(e.at).getDay() === now.getDay());
   const intervals = past

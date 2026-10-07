@@ -72,30 +72,13 @@ export async function createShareImage(content, totalCount, publicUrl) {
   c.fillText("ヤニウォーズ", 80, 100);
   c.font = "22px sans-serif";
   c.fillText("RECLAIM YOUR WORLD", 80, 143);
-  c.font = "bold 72px sans-serif";
-  c.fillText("お前には、", 80, 295);
-  c.fillText("もう奪わせない。", 80, 395);
-  c.font = "30px sans-serif";
-  c.fillText(`${content.label}、守った。`, 80, 490);
-  let countSize = 180;
-  do {
-    c.font = `bold ${countSize}px sans-serif`;
-    countSize -= 4;
-  } while (c.measureText(String(t.count)).width > 800 && countSize > 60);
-  c.fillText(String(t.count), 70, 675);
-  const countWidth = c.measureText(String(t.count)).width;
-  c.font = "36px sans-serif";
-  c.fillText("本", 90 + countWidth, 665);
-  c.font = "bold 65px sans-serif";
-  c.fillText(`¥${yen(t.money)}`, 80, 795, 920);
-  c.font = "30px sans-serif";
-  c.fillText(`寿命換算  ${duration(t.life)}`, 80, 870);
-  c.fillText(`自由時間  ${duration(t.free)}`, 80, 925);
-  const sceneUrl = URL.createObjectURL(
-    new Blob([landscapeSvg(totalCount, { compact: true })], {
-      type: "image/svg+xml",
-    }),
-  );
+  c.font = "bold 48px sans-serif";
+  c.fillText("お前には、もう奪わせない。", 80, 220);
+  c.font = "38px sans-serif";
+  c.fillText(`${content.label} ${t.count}本 守った`, 80, 315, 920);
+  c.font = "bold 62px sans-serif";
+  c.fillText(`${yen(t.money)}円 取り戻した`, 80, 405, 920);
+  const sceneUrl = URL.createObjectURL(new Blob([landscapeSvg(totalCount)], { type: "image/svg+xml" }));
   try {
     const image = new Image();
     await new Promise((resolve, reject) => {
@@ -103,21 +86,14 @@ export async function createShareImage(content, totalCount, publicUrl) {
       image.onerror = () => reject(Error("景色を作成できませんでした"));
       image.src = sceneUrl;
     });
-    c.drawImage(image, 0, 990, 1080, 360);
-  } finally {
-    URL.revokeObjectURL(sceneUrl);
-  }
-  c.fillStyle = p.bg;
-  c.textAlign = "center";
+    c.drawImage(image, 0, 450, 1080, 648);
+  } finally { URL.revokeObjectURL(sceneUrl); }
+  c.fillStyle = p.ink;
+  c.font = "32px sans-serif";
+  c.fillText(`寿命換算  ${duration(t.life)}`, 80, 1160, 920);
+  c.fillText(`自由時間  ${duration(t.free)}`, 80, 1220, 920);
   c.font = "24px sans-serif";
-  c.fillText(
-    publicUrl
-      ? publicUrl.replace(/^https:\/\//, "").replace(/\/$/, "")
-      : "ヤニウォーズ · 世界を取り戻そう。",
-    540,
-    1288,
-    920,
-  );
+  c.fillText(publicUrl ? publicUrl.replace(/^https:\/\//, "").replace(/\/$/, "") : "ヤニウォーズ · 世界を取り戻そう。", 80, 1300, 920);
   const blob = await new Promise((resolve) =>
     canvas.toBlob(resolve, "image/png"),
   );

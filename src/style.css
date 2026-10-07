@@ -814,3 +814,28 @@ dialog a {
     display: none;
   }
 }
+
+/* Small editorial chart: no extra cards, one shared period selector. */
+.patterns { margin: 36px 0; padding: 22px 0; border-block: 1px solid currentColor; }
+.patterns h2 { margin-top: 0; }
+.histogram { display: grid; grid-template-columns: repeat(24, minmax(0, 1fr)); height: 124px; gap: 2px; align-items: end; }
+.histogram button { position: relative; padding: 0; height: 100%; border: 0; background: transparent; min-width: 0; border-radius: 0; }
+.histogram button span { display: block; position: absolute; bottom: 0; width: 100%; height: max(2px, var(--bar-height)); background: var(--green); opacity: var(--bar-opacity); pointer-events: none; }
+.histogram button:focus-visible, .histogram button[aria-pressed=true] { outline: 2px solid var(--ink); outline-offset: 1px; }
+.hour-axis { display: flex; justify-content: space-between; font-size: 11px; padding-top: 8px; }
+.peak-label { font-size: 12px; margin: 20px 0 0; }
+.peak-label strong { display: block; margin-top: 8px; font-size: 17px; font-weight: 500; }
+.public-links { position: static; display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 20px 0; margin: 12px 0; border-top: 1px solid currentColor; background: none; box-shadow: none; font-size: 12px; width: auto; transform: none; }
+.public-links a { padding: 8px 0; color: inherit; text-underline-offset: 4px; }
+.advert { margin: 64px 0 32px; }
+.advert.pending { height: 0; margin: 0; overflow: hidden; }
+.advert-frame { width: 100%; height: 300px; border: 0; }
+.article { max-width: 640px; margin: auto; padding: 32px 24px calc(40px + env(safe-area-inset-bottom)); line-height: 1.95; }
+.article h1 { font-size: clamp(26px, 7vw, 40px); margin: 36px 0; }
+.article h2 { margin-top: 32px; font-size: 20px; }
+.article a { color: inherit; overflow-wrap: anywhere; }
+.article p { margin: 16px 0; }
+.intro { overflow-wrap: anywhere; text-wrap: pretty; }
+
+.import-records {display:block;margin:24px 0;font-size:13px;}
+.import-records input {display:block;max-width:100%;font-size:12px;margin-top:10px;}
