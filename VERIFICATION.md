@@ -5,13 +5,13 @@
 |検証|結果|
 |---|---|
 |npm test|37件成功|
-|npm run build|成功。Cloudflare Pagesのdist、広告専用ads-distを生成|
-|npm run test:e2e|30件成功。iPhone 13 / Pixel 7相当のChromium|
+|npm run build|成功。Cloudflare Pages向けdistを生成|
+|npm run test:e2e|32件成功。iPhone 13 / Pixel 7相当のChromium|
 |Python PDF解析テスト|2件成功|
 |320px|初回コピー・記録画面の横はみ出しなし。画像で確認|
 |時間帯統計|0件・1件・5万件・日付/週跨ぎ・0/23時・両イベント種別・3時間ピーク・不足時表示|
 |シェア|低/高回復度のPNGとホームが同じlandscapeSvgを使用することを実際のBlobで照合|
-|広告|ID未設定時通信なし、production制限、異なるorigin、読み込み重複防止、script失敗で枠を除去。Googleへの実広告通信はモック|
+|広告|ID未設定時通信なし、production制限、高さ100pxのホーム/記録バナー、説明末尾の任意枠、320px幅、画面切替でもscript読み込み1回、script失敗で枠を除去。Googleへの実広告通信はモック|
 |保存|IndexedDB・OPFS3世代・復旧・完全削除・Persistent Storageフォールバック・移行ファイル統合|
 |オフライン|ホーム・記録・時間帯グラフ・説明ページ・設定・再起動を確認|
 |静的説明ページ|6ページとads.txtの200応答・JS不要の本文|
@@ -23,12 +23,13 @@
 
 - シェアテストでreload後の描画完了を待つよう修正。
 - 広告テストfixtureのHTTP charsetをUTF-8として日本語の文字化けを修正。
+- Google公式FAQを確認し、広告専用iframeを使用せず、指定されたホームコピー下に通常AdSenseバナーを配置。
 
 ## 未検証・残る制限
 
 - 実機iOS SafariのインストールとSNSアプリ連携。自動テストはChromiumによる端末模擬。
 - 実際のAdSense審査・配信・認定CMP。IDなしのため本番広告は無効。
-- 別originの広告iframe配信はGoogle側で承認と同意画面表示を確認してから有効化する。
+- ホームバナーはID設定・審査・認定CMP準備後に有効化可能。同じページで動くため別オリジン隔離ではない。記録情報は広告への引数に渡さない。
 - AdSense申請前に運営用連絡先の設定が必要。個人メールは公開しない。
 - 全銘柄網羅/終売検知は保証しない。PMI/BATの公式ページは変更監視、認可データの構造化は主に財務省。曖昧な225行は保留。
 - 異なる公開URLの端末記録は自動移行できない。既存の書き出しと新しい読み込みを使用する。

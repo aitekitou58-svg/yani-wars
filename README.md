@@ -51,35 +51,14 @@ localhostや旧公開URLから別ドメインへ移るとブラウザの保存�
 
 初期状態は**広告なし**です。仮Publisher IDは本番登録しません。以下は運営者用です。AdSense審査・実広告配信は未確認で、審査通過を保証しません。
 
-### 記録を広告コードから隔離する構成
+### ホームのバナー広告
 
-Googleスクリプトをアプリと同じオリジンで動かすと、技術的にはそのオリジンの保存領域にアクセスできます。そのため、本実装は**広告専用の別Pagesプロジェクト**を使います。同じGitHubソース・build command、出力先だけ `ads-dist` を指定してください。アプリ本体は `dist`、広告だけは `ads-dist`。広告サイトには記録・アプリJS・商品マスターを置きません。広告のiframeにはreferrerを送らず、本数・銘柄・回復度・設定などをURLやメッセージで渡しません。
+ホームの「奪われていたものを取り戻すほど、世界に色が戻る。」の下に高さ100pxのバナーを用意しています。Google公式の幅可変・高さ固定コードを使い、スマホでも大きな四角い広告にならない配置にします。[公式コード例](https://support.google.com/adsense/answer/9183363?hl=ja) AdSenseは表示回数に基づく収益に対応しますが、毎回の収益は保証されません。広告の自動更新は行いません。
 
-この隔離構成のAdSense審査・別ドメインiframe配信の可否は、実アカウントでGoogleの方針を確認する必要があります。未承認なら広告を無効のまま運用してください。動かすために隔離を解除しないでください。
+開始するにはAdSenseで公開サイトを登録し審査を受け、Google認定CMP/Privacy & Messagingを設定してください。`public/config.json` の `adsense.clientId` に実際のPublisher ID、`slotHome` にディスプレイ広告ユニットのSlot IDを設定し、自動広告とモバイル広告サイズの自動最適化は無効にします。その後、`enabled` と `consentConfigured` をtrueにします。`public/ads.txt` はGoogleが指定する実際の販売者行に置き換えて再build・公開します。お問い合わせ窓口も公開前に準備してください。
 
-### 手順と入力箇所
+未設定・開発環境・HTTP・オフラインでは広告通信を開始しません。配信失敗時は枠を畳みます。広告モジュールは記録や統計の保存処理を参照せず、喫煙履歴・銘柄・節約額・時間帯統計を広告へ渡しません。ただし通常のAdSenseは同じページで動作するため、ブラウザによる物理的な別オリジン隔離ではありません。Googleが禁止する広告専用iframeは使用しません。`hostUrl` は旧設定でホームバナーには不要です。別サイト公開は不要です。記録ページ末尾は `slotRecord`、このアプリについて・寿命換算ページ末尾は `slotInfo` で任意に設定できます。共通広告モジュールを使い、1画面1枠です。
 
-1. Google AdSenseアカウントを作成します。
-2. ヤニウォーズの実際の公開URLを「サイト」に登録します。隔離する広告専用URLの扱いもGoogle側で確認します。
-3. 公開した6つの説明ページ、運営者の連絡先、ポリシーを確認してサイト審査を申請します。連絡先は現在未設定です。個人メールを勝手に公開しないため、運営用窓口を決めて `scripts/information.mjs` のabout/privacyに記載してください。
-4. Publisher ID（`ca-pub-`から始まるID）を取得します。アカウント発行のIDは審査申請前に取得できる場合もあります。
-5. ディスプレイ広告ユニットを作成します。**自動広告は無効**にし、ホームや操作ボタンの近くへ自動挿入させないでください。
-6. 記録用・説明用のSlot IDを取得します。
-7. **`public/config.json` → `adsense`** に設定します。
-   - `clientId`：Publisher ID（`ca-pub-`を含む）
-   - `slotRecord`：記録ページ用の10桁のSlot ID
-   - `slotInfo`：このアプリについて／寿命換算ページ用の10桁のSlot ID
-   - `hostUrl`：別途作った広告専用PagesのHTTPS URL（末尾 `/`）
-   - `enabled`：審査と同意設定完了後に `true`
-   - `consentConfigured`：次のPrivacy & Messaging設定と実機検証が済んだ後に `true`
-8. **`public/ads.txt`** のコメントをGoogle指定の販売者行へ置換します。形式は `google.com, pub-自分の数字ID, DIRECT, f08c47fec0942fa0`。`ca-`は外します。広告専用サイトのads.txtはbuild時に同じclientIdから生成します。
-9. mainへ反映し、Cloudflareの本体と広告専用プロジェクトを再デプロイします。
-10. `/ads.txt`、記録ページ末尾、説明ページ末尾を確認します。読み込み失敗や広告枠が空の場合は自動で畳まれ、記録機能には影響しません。広告の自己クリックはしないでください。
-11. **広告を実際に有効化する前に** AdSense → **Privacy & messaging** で対象地域の同意メッセージを作成・公開します。EEA・英国・スイス向けにはGoogle認定CMPを使用します。Google CMPまたは認定CMPを使い、独自の地域推測・同意バナーは追加しません。別オリジンiframe内でCMPメッセージが適切に表示・操作できるかを実機で検証し、表示できなければ広告を有効化しないでください。
-
-設定値は公開情報です。秘密鍵やAPIトークンは不要です。ID未設定、開発時、HTTP/localhost、オフライン、同意設定未完了なら広告を読み込みません。1画面最大1枠で、広告用scriptは同じフレームで重複追加しません。
-
-参照：[Google Privacy & messaging](https://support.google.com/adsense/answer/10924669?hl=ja) / [認定CMPの要件](https://support.google.com/adsense/answer/13554020?hl=ja)
 
 ## 時間帯統計・風景・シェア
 
