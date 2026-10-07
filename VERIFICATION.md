@@ -6,7 +6,7 @@
 |---|---|
 |npm test|37件成功|
 |npm run build|成功。Cloudflare Pages向けdistを生成|
-|npm run test:e2e|32件成功。iPhone 13 / Pixel 7相当のChromium|
+|npm run test:e2e|34件成功。iPhone 13 / Pixel 7相当のChromium|
 |Python PDF解析テスト|2件成功|
 |320px|初回コピー・記録画面の横はみ出しなし。画像で確認|
 |時間帯統計|0件・1件・5万件・日付/週跨ぎ・0/23時・両イベント種別・3時間ピーク・不足時表示|
@@ -17,9 +17,11 @@
 |静的説明ページ|6ページとads.txtの200応答・JS不要の本文|
 |輸入銘柄|既存322商品、英字/カタカナ/部分一致、価格スナップショットの回帰テスト成功|
 
-既存GitHubの公式商品更新は同日に280PDFを確認して成功（変更なし）。今回のソースでGitHub/Cloudflareの実行結果は公開完了後に追記。
+Cloudflare Pages初回公開成功：https://yaniwars.pages.dev/ 。GitHub CI（56e4ea4）は成功。公式商品更新は手動および同日6:25の予約実行で成功（変更なし）。公開で判明したHTML転送の問題も修正し、公開URLの再確認を行います。
 
 ## 修正した検証エラー
+
+- Cloudflareのindex.html正規化リダイレクトをCache APIが保持し、再読み込み時に失敗する問題を修正。転送済みHTMLを通常のResponseへ変換して返し、オンライン/オフラインと説明ページで回帰テストを追加。
 
 - シェアテストでreload後の描画完了を待つよう修正。
 - 広告テストfixtureのHTTP charsetをUTF-8として日本語の文字化けを修正。

@@ -1,5 +1,7 @@
 # ヤニウォーズ
 
+公開URL：[https://yaniwars.pages.dev/](https://yaniwars.pages.dev/)
+
 **お前には、もう奪わせない。**
 
 吸いたいと思った。でも、吸わなかった。その1回から、お金も、時間も、そして命も。
