@@ -1,3 +1,4 @@
+import { adsenseHead } from "./adsense-head.mjs";
 import { buildInformation, articles } from "./information.mjs";
 import { mkdir, cp, readFile, writeFile, rm } from "node:fs/promises";
 import { createHash } from "node:crypto";
@@ -57,10 +58,12 @@ await rm("dist", { recursive: true, force: true });
 await mkdir("dist", { recursive: true });
 await cp("public", "dist", { recursive: true });
 await cp("src", "dist/src", { recursive: true });
-await cp("index.html", "dist/index.html");
 const config = JSON.parse(await readFile('public/config.json', 'utf8'));
+const production = process.env.YANI_ENV !== 'development';
+const verificationHead = adsenseHead(config, production);
+await writeFile('dist/index.html', (await readFile('index.html', 'utf8')).replace('<!-- ADSENSE_SITE_VERIFICATION -->', verificationHead));
 await writeFile('dist/src/build-mode.js', `export const production = ${process.env.YANI_ENV !== 'development'};`);
-await buildInformation(config);
+await buildInformation(config, {verificationHead});
 
 const assets = [
   "./",
