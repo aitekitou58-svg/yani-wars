@@ -34,7 +34,10 @@ export function mountAd(container, config, slot, production) {
   const unit = document.createElement('ins'); unit.className = 'adsbygoogle';
   unit.style.display = 'block'; unit.style.minHeight = '100px';
   unit.dataset.adClient = a.client; unit.dataset.adSlot = a.slot;
-  unit.dataset.adFormat = slot === 'slotHome' ? 'horizontal' : 'auto'; unit.dataset.fullWidthResponsive = 'true';
+  if (slot === 'slotHome') {
+    // Google-approved expandable width / fixed-height responsive code.
+    Object.assign(unit.style, {minWidth:'120px', maxWidth:'970px', width:'100%', height:'100px'});
+  } else { unit.dataset.adFormat = 'auto'; unit.dataset.fullWidthResponsive = 'true'; }
   container.append(label, unit);
   let timer;
   const observer = new MutationObserver(() => {
@@ -79,6 +82,8 @@ export function positionHomeAd(config, production) {
     banner.reposition = position;
   }
   banner.hidden = false;
+  const bounds = anchor.getBoundingClientRect();
+  banner.style.width = `${bounds.width}px`;
   mountAd(banner, config, 'slotHome', production);
   requestAnimationFrame(banner.reposition);
 }
