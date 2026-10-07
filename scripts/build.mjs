@@ -88,11 +88,12 @@ const assets = [
   "./icons/apple-touch-icon.png",
 ];
 const hash = createHash("sha256");
+hash.update("navigation-cache-v2");
 for (const f of assets.slice(1))
   hash.update(await readFile(`dist/${f.slice(2)}`));
 const version = hash.digest("hex").slice(0, 16);
 await writeFile(
   "dist/sw.js",
-  `const CACHE='yani-static-${version}';const ASSETS=${JSON.stringify(assets)};self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('yani-static-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));self.addEventListener('fetch',e=>{if(e.request.method!=='GET'||new URL(e.request.url).origin!==self.location.origin)return;const url=new URL(e.request.url);const scope=new URL(self.registration.scope);const relative=url.pathname.slice(scope.pathname.length);if(e.request.mode==='navigate'){const page=relative===''?'index.html':relative.endsWith('/')?relative+'index.html':relative;const key=ASSETS.includes('./'+page)?new URL(page,scope).href:null;e.respondWith(key?caches.match(key).then(r=>r||fetch(e.request)):fetch(e.request));return;}if(!ASSETS.some(a=>a.slice(2)===relative))return;e.respondWith(caches.open(CACHE).then(async c=>{const hit=await c.match(e.request);return hit||fetch(e.request);}));});`,
+  `const CACHE='yani-static-${version}';const ASSETS=${JSON.stringify(assets)};self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('yani-static-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));self.addEventListener('fetch',e=>{if(e.request.method!=='GET'||new URL(e.request.url).origin!==self.location.origin)return;const url=new URL(e.request.url);const scope=new URL(self.registration.scope);const relative=url.pathname.slice(scope.pathname.length);if(e.request.mode==='navigate'){const page=relative===''?'index.html':relative.endsWith('/')?relative+'index.html':relative;const key=ASSETS.includes('./'+page)?new URL(page,scope).href:null;e.respondWith(key?caches.match(key).then(r=>r?(r.redirected?new Response(r.body,{status:r.status,statusText:r.statusText,headers:r.headers}):r):fetch(e.request)):fetch(e.request));return;}if(!ASSETS.some(a=>a.slice(2)===relative))return;e.respondWith(caches.open(CACHE).then(async c=>{const hit=await c.match(e.request);return hit||fetch(e.request);}));});`,
 );
 console.log(`Built static PWA: dist/ (${version})`);
