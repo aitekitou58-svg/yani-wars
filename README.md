@@ -51,7 +51,7 @@ Netlify設定・ライブラリは使いません。GitHub Pagesへのデプロ�
 
 ## Google AdSenseを有効にする方法
 
-初期状態は**広告なし**です。仮Publisher IDは本番登録しません。以下は運営者用です。AdSense審査・実広告配信は未確認で、審査通過を保証しません。
+現在は**所有確認のみ有効、広告枠は無効**です。正式なPublisher IDとads.txtは設定済みです。以下は運営者用です。AdSense審査・実広告配信は未確認で、審査通過を保証しません。
 
 ### ホームのバナー広告
 
@@ -59,7 +59,7 @@ Netlify設定・ライブラリは使いません。GitHub Pagesへのデプロ�
 
 開始するにはAdSenseで公開サイトを登録し審査を受け、Google認定CMP/Privacy & Messagingを設定してください。`public/config.json` の `adsense.clientId` に実際のPublisher ID、`slotHome` にディスプレイ広告ユニットのSlot IDを設定し、自動広告とモバイル広告サイズの自動最適化は無効にします。その後、`enabled` と `consentConfigured` をtrueにします。`public/ads.txt` はGoogleが指定する実際の販売者行に置き換えて再build・公開します。お問い合わせ窓口も公開前に準備してください。
 
-未設定・開発環境・HTTP・オフラインでは広告通信を開始しません。配信失敗時は枠を畳みます。広告モジュールは記録や統計の保存処理を参照せず、喫煙履歴・銘柄・節約額・時間帯統計を広告へ渡しません。ただし通常のAdSenseは同じページで動作するため、ブラウザによる物理的な別オリジン隔離ではありません。Googleが禁止する広告専用iframeは使用しません。`hostUrl` は旧設定でホームバナーには不要です。別サイト公開は不要です。記録ページ末尾は `slotRecord`、このアプリについて・寿命換算ページ末尾は `slotInfo` で任意に設定できます。共通広告モジュールを使い、1画面1枠です。
+広告ユニットはID未設定・開発環境・HTTP・オフラインでは動作しません。所有確認コードは、本番サイトでのみSlot IDとは独立して読み込みます。配信失敗時は枠を畳みます。広告モジュールは記録や統計の保存処理を参照せず、喫煙履歴・銘柄・節約額・時間帯統計を広告へ渡しません。ただし通常のAdSenseは同じページで動作するため、ブラウザによる物理的な別オリジン隔離ではありません。Googleが禁止する広告専用iframeは使用しません。`hostUrl` は旧設定でホームバナーには不要です。別サイト公開は不要です。記録ページ末尾は `slotRecord`、このアプリについて・寿命換算ページ末尾は `slotInfo` で任意に設定できます。共通広告モジュールを使い、1画面1枠です。
 
 
 ## 時間帯統計・風景・シェア
@@ -82,3 +82,7 @@ IndexedDB主保存、対応端末ではOPFS3世代バックアップ。Cache API
 ブラウザテストは隔離したテスト用データを使います。実ユーザーの記録は変更しません。iPhone/AndroidはChromiumでの画面・タッチ環境の模擬です。実機Safariのホーム画面追加や各SNSアプリでの共有、実際のGoogle広告・CMPは別途確認が必要です。
 
 説明ページはJSなしでも読める静的HTMLです。`scripts/information.mjs` から `/about/`、`/guide/`、`/life/`、`/patterns/`、`/privacy/`、`/advertising/` を生成します。Service Workerはこれらもオフライン対応します。新バージョンは全タブを閉じた後に切り替わり、古い画面を途中で壊しません。
+
+### AdSenseサイト所有確認
+
+public/config.jsonのadsense.clientIdはca-pub-8745360624658964。siteVerification=trueで所有確認のみ有効。scripts/adsense-head.mjsが本番build時に共通index.htmlと公開説明ページのheadへ確認コードと公式メタタグを挿入します。GoogleコードはHTTPSのyaniwars.pages.devでのみ読み込み、開発build・localhost・他のプレビューでは読み込みません。既存の広告ローダーとscriptを共有し、Slot ID・enabled・consentConfiguredは未設定/falseのままです。ads.txtは正式な販売者行へ更新済み。AdSenseの自動広告も無効のまま審査してください。
