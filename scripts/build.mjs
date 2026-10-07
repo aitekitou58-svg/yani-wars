@@ -1,5 +1,4 @@
 import { buildInformation, articles } from "./information.mjs";
-import { buildAds } from "./build-ads.mjs";
 import { mkdir, cp, readFile, writeFile, rm } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { deflateSync } from "node:zlib";
@@ -62,7 +61,7 @@ await cp("index.html", "dist/index.html");
 const config = JSON.parse(await readFile('public/config.json', 'utf8'));
 await writeFile('dist/src/build-mode.js', `export const production = ${process.env.YANI_ENV !== 'development'};`);
 await buildInformation(config);
-await buildAds(config);
+
 const assets = [
   "./",
   ...Object.keys(articles).map(slug => `./${slug}/index.html`),
