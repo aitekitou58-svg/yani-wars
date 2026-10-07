@@ -4,3 +4,5 @@ test-results/
 playwright-report/
 work/
 __pycache__/
+ads-dist/
+debug.log

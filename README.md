@@ -2,168 +2,102 @@
 
 **お前には、もう奪わせない。**
 
-「吸いたいと思ったけれど吸わなかった」1回を記録し、お金・自由時間・寿命換算と、世界の色を取り戻すスマートフォン向けPWAです。「吸った」は時刻の記録だけ。積み上げた成果は減りません。アカウント、広告、解析、通知、サーバー側のユーザーデータ保存はありません。
+吸いたいと思った。でも、吸わなかった。その1回から、お金も、時間も、そして命も。
 
-## 最初に動かす
+既存の静的PWAを継続しています。吸った記録を追加しても過去の成果や景色は減りません。アカウント登録、外部AI、Push通知、サーバーへの利用記録送信はありません。広告は初期状態で無効です。
 
-Node.js 24以上を用意し、このREADMEがあるフォルダでターミナルを開きます。
+## ローカルで動かす
 
-```sh
-npm ci
-npm run build
-npm run dev
-```
+Node.js 24を使います。このREADMEのあるフォルダで `npm ci` → `npm run build` → `npm run dev`。ブラウザで http://localhost:4173 を開きます。ソース変更後は再buildしてください。開発用ビルドは環境変数 `YANI_ENV=development` を指定します。localhostではproductionビルドでも広告は読み込みません。
 
-表示された `http://localhost:4173` を開きます。終了はターミナルで Ctrl+C。`file://` でHTMLを直接開く方式には対応しません。ソース変更後は再度 `npm run build` が必要です。
+## Cloudflare Pagesへ公開する方法
 
-## ファイル構成
+1. GitHubの既存 `yani-wars` リポジトリを使います。mainにこのフォルダのファイル一式を置きます。node_modules、work、test-results、debug.logは含めません。
+2. Cloudflareにログイン → Workers & Pages → Create application → **Pagesに続行**。Workersは作りません。
+3. **既存Gitリポジトリをインポート** → GitHubを接続。許可するリポジトリはyani-warsだけにします。
+4. プロジェクト名 `yaniwars`（利用可能な場合）、本番ブランチ `main`、Framework preset **None**。
+5. Build command **npm run build**、Build output directory **dist**、Root directoryは空欄。Node.jsは `.node-version` の24を使用します。
+6. Save and Deploy。成功した画面の `https://プロジェクト名.pages.dev` が公開URLです。Workers、Functions、Firebase、VPS、データベース設定は不要です。
+7. 公開URLで初回設定→1回記録→再読み込み→オフラインで再起動を確認します。Safari/Chromeからホーム画面へ追加してください。
+8. GitHub main更新でCloudflareが自動ビルドします。Deploymentsで同じコミットが成功したか確認できます。シェアURLは公開先から自動生成するため `public/config.json` の `publicUrl` は空欄のままで構いません。
 
-```text
-index.html                    アプリの入口
-src/app.js                    画面と操作、端末内のシェア画像生成
-src/style.css                 モバイル画面・連続的な色の変化
-src/core.js                   集計、単価、色、起動時判定
-src/sharing.js                今日・累計の画像、投稿文、公開URL
-src/world.js                  20本＝1日相当の景色の回復ルール
-src/landscape.js              木・花・草の連続的な成長とSVG景色
-src/storage.js                IndexedDB、OPFS、復旧と削除
-public/config.json            寿命換算・初期喫煙時間・節目の設定
-public/data/products.json     出典付き商品マスターと価格履歴
-public/data/catalog-coverage.json  財務省資料の収録範囲
-public/manifest.webmanifest   ホーム画面アプリの設定
-public/icons/                 SVG原画と生成したPNGアイコン
-scripts/build.mjs             静的ビルド、アイコン、Service Worker生成
-scripts/serve.mjs             ローカル確認用HTTPサーバー
-scripts/update-products.mjs   公式商品情報の定期確認
-scripts/backfill-mof.mjs      財務省の過去認可資料の収集
-tests/                        計算・保存・商品解析・ブラウザの自動テスト
-.github/workflows/            GitHubの自動テスト・公開・毎日更新
-dist/                         公開できる完成ファイル（ビルドで生成）
-```
+Netlify設定・ライブラリは使いません。GitHub Pagesへのデプロイ処理はworkflowから外し、GitHubはソース保管とテスト・商品更新に使います。既存GitHub Pagesの古い公開物はCloudflareへの切り替えだけでは消えません。
 
-実行時の外部ライブラリ・CDN・Webフォントは使いません。GitHub Pagesなど任意の静的ホスティングに `dist/` を置けます。サブディレクトリへの配置にも対応しています。Cloudflare Workers、Firebase、VPSは不要です。
+参照：[Cloudflare静的HTML](https://developers.cloudflare.com/pages/framework-guides/deploy-anything/) / [Git連携](https://developers.cloudflare.com/pages/get-started/git-integration/)
 
-## コマンドとテスト
+### 既存の記録を引き継ぐ
 
-```sh
-npm test                        # 計算・保存・商品マスターのテスト
-npm run build                   # dist/生成
-npx playwright install chromium # 初回のみ：ブラウザテスト環境
-npm run test:e2e                 # iPhone/Android相当サイズの操作テスト
-npm run dev                     # ローカル確認
-```
+同じURLのアプリ更新では既存のIndexedDB・OPFSをそのまま使います。データ形式version 1とDB名は変更していません。
 
-テストでは値上げ前後の金額、記録時点の時間、日付跨ぎ、色の単調増加、喫煙時の成果維持、IndexedDB、OPFS、破損からの復元、全削除、シェア、オフライン再起動を確認します。Playwrightはブラウザ操作を自動実行するテストツールです。画面サイズはiPhone 13 / Pixel 7相当ですが、どちらもChromiumで実行するため実機Safariの検証を代替しません。
+localhostや旧公開URLから別ドメインへ移るとブラウザの保存領域が異なります。旧URLの設定で「記録をファイルに保存」、新URLの初回画面または設定から「保存した記録を読み込む」を選びます。内容を検証して件数を確認後に統合し、同じIDは重複させません。現在の設定を優先し、記録時の価格・時間は維持します。サーバーへファイルを送りません。移行完了までは旧サイトのデータを消さないでください。
 
-## PWAの確認・スマホへの追加
+## GitHub Actionsについて
 
-PWAはWebサイトをホーム画面からアプリのように使う仕組みです。公開先は **HTTPS** が必要です（開発用localhostは例外）。スマホでPCのLAN内HTTPアドレスを開くだけでは、オフライン機能などが動かないことがあります。
+- `.github/workflows/pages.yml`：main更新・手動実行でPython解析テスト、JSテスト、build、iPhone/Android相当のブラウザテストを実行。完成したdistをartifactに保存します。名前は **Test static PWA for Cloudflare Pages**。
+- `.github/workflows/products.yml`：毎日日本時間6:17（UTC21:17）に商品情報を確認。**Daily official product update** → Run workflowで手動実行できます。
+- 変更がある場合のみ価格履歴を含む商品マスターをcommit。CloudflareのGit連携がそのmain更新を受信して再公開します。GitHubのGITHUB_TOKENによるcommitでは別のGitHub push workflowは起動しないため、商品更新workflow自身でもテストとbuildを実行します。Cloudflare側の受信結果は初回の商品変更commit時にDeploymentsで確認してください。
+- 公式資料の解析エラー時は推測で価格を書き換えず処理を止めます。Actionsの赤い実行とartifact `official-catalog-report` を確認してください。
+- GitHub都合で予約が遅れる場合や、公開リポジトリの長期無活動でscheduleが無効化される場合があります。毎日の操作は不要ですが失敗通知は確認してください。
 
-1. 公開URLを一度オンラインで開き、銘柄と語り口を選びます。
-2. iPhone：Safariの共有メニュー →「ホーム画面に追加」。
-3. Android：Chromeのメニュー →「ホーム画面に追加」または「アプリをインストール」。
-4. ホーム画面から起動し、1回記録して終了。再起動後に記録があることを確認。
-5. 機内モードで再起動し、記録・設定・履歴が使えることを確認。
+### 商品の収録範囲
 
-ブラウザの開発者ツール → ApplicationでManifest、Service Worker、IndexedDBを確認できます。新しいアプリはバックグラウンドで準備し、開いている画面をすべて閉じた後の起動で切り替えます。キャッシュ途中の新バージョンは適用しません。商品マスターもアプリの公開更新に合わせて配信され、選択した商品の価格は次回起動で更新されます。
+現在 **322商品**。財務省の認可一覧から遡ったPDF **280件**、抽出採用357行、曖昧な225行は保留しています。範囲は `public/data/catalog-coverage.json`。紙巻き・加熱式が対象で、大手3社以外の輸入銘柄も含みます。英字・カタカナ・ひらがな・全半角・部分一致で検索できます。別名辞書はDAVIDOFF／ダビドフ等にも対応しています。ただし、正式価格を確認できない紙巻き商品は未収録です。名前だけを理由に推測登録しません。
 
-## GitHubへのpushと公開
+主ソースは財務省。JTは表の構造を解析し、PMI・BATは公式サイトの可用性・変更を監視します。PMI/BATの全商品・全終売情報を自動で構造化するものではありません。新規認可・適用日付き価格/入り数変更は財務省経由で追従します。資料から消えただけでは終売と判定しません。正式な終了情報が確認できた範囲だけ状態へ反映します。メーカー・輸入元・製造国・英名が資料にない場合は推測しません。
 
-GitHubで空のリポジトリを作成し、このフォルダで以下を実行します。`YOUR_NAME` と `YOUR_REPOSITORY` は自分のものに置き換えてください。
+認可済みでも販売継続未確認の商品はその旨表示します。現行一覧から辿れない古い資料、曖昧な行、正式価格不明の商品は未収録です。手動登録へフォールバックしてください。価格は各記録時点で保存され、後の値上げで過去の成果を再計算しません。
 
-```sh
-git init
-git add .
-git commit -m "Create Yani Wars PWA"
-git branch -M main
-git remote add origin https://github.com/YOUR_NAME/YOUR_REPOSITORY.git
-git push -u origin main
-```
+## Google AdSenseを有効にする方法
 
-GitHub側で一度だけ設定します。
+初期状態は**広告なし**です。仮Publisher IDは本番登録しません。以下は運営者用です。AdSense審査・実広告配信は未確認で、審査通過を保証しません。
 
-1. Settings → Pages → Sourceを **GitHub Actions** にする。
-2. Settings → Actions → GeneralでActionsを有効にし、Workflow permissionsを **Read and write permissions** にする（組織の制限がある場合は管理者設定が必要）。
-3. Actions → **Test and publish PWA** → Run workflow。ビルド・テスト後にPagesへ公開されます。
-4. Actions → **Daily official product update** で定期更新を確認。必要ならRun workflowで手動実行。
+### 記録を広告コードから隔離する構成
 
-定期更新は毎日 **日本時間6:17** に予約されています。GitHub側の混雑で遅延することがあります。スケジュールはデフォルトブランチのワークフローのみ実行されます。公開リポジトリは長期無活動でスケジュールが停止する場合があります。赤い失敗マークと実行ログを確認してください。
+Googleスクリプトをアプリと同じオリジンで動かすと、技術的にはそのオリジンの保存領域にアクセスできます。そのため、本実装は**広告専用の別Pagesプロジェクト**を使います。同じGitHubソース・build command、出力先だけ `ads-dist` を指定してください。アプリ本体は `dist`、広告だけは `ads-dist`。広告サイトには記録・アプリJS・商品マスターを置きません。広告のiframeにはreferrerを送らず、本数・銘柄・回復度・設定などをURLやメッセージで渡しません。
 
-商品データが変わった場合のみコミットします。GitHubの自動コミットでは別のpushワークフローが発火しないため、定期更新自身がPages公開まで行います。Pagesを使用しない場合は両ワークフローの公開ステップを外し、希望する静的ホストに `dist/` を配置してください。
+この隔離構成のAdSense審査・別ドメインiframe配信の可否は、実アカウントでGoogleの方針を確認する必要があります。未承認なら広告を無効のまま運用してください。動かすために隔離を解除しないでください。
 
-2026年10月7日に https://aitekitou58-svg.github.io/yani-wars/ へ公開済みです。ソースは https://github.com/aitekitou58-svg/yani-wars に保存しています。
+### 手順と入力箇所
 
-## 商品マスター・輸入たばこの扱い
+1. Google AdSenseアカウントを作成します。
+2. ヤニウォーズの実際の公開URLを「サイト」に登録します。隔離する広告専用URLの扱いもGoogle側で確認します。
+3. 公開した6つの説明ページ、運営者の連絡先、ポリシーを確認してサイト審査を申請します。連絡先は現在未設定です。個人メールを勝手に公開しないため、運営用窓口を決めて `scripts/information.mjs` のabout/privacyに記載してください。
+4. Publisher ID（`ca-pub-`から始まるID）を取得します。アカウント発行のIDは審査申請前に取得できる場合もあります。
+5. ディスプレイ広告ユニットを作成します。**自動広告は無効**にし、ホームや操作ボタンの近くへ自動挿入させないでください。
+6. 記録用・説明用のSlot IDを取得します。
+7. **`public/config.json` → `adsense`** に設定します。
+   - `clientId`：Publisher ID（`ca-pub-`を含む）
+   - `slotRecord`：記録ページ用の10桁のSlot ID
+   - `slotInfo`：このアプリについて／寿命換算ページ用の10桁のSlot ID
+   - `hostUrl`：別途作った広告専用PagesのHTTPS URL（末尾 `/`）
+   - `enabled`：審査と同意設定完了後に `true`
+   - `consentConfigured`：次のPrivacy & Messaging設定と実機検証が済んだ後に `true`
+8. **`public/ads.txt`** のコメントをGoogle指定の販売者行へ置換します。形式は `google.com, pub-自分の数字ID, DIRECT, f08c47fec0942fa0`。`ca-`は外します。広告専用サイトのads.txtはbuild時に同じclientIdから生成します。
+9. mainへ反映し、Cloudflareの本体と広告専用プロジェクトを再デプロイします。
+10. `/ads.txt`、記録ページ末尾、説明ページ末尾を確認します。読み込み失敗や広告枠が空の場合は自動で畳まれ、記録機能には影響しません。広告の自己クリックはしないでください。
+11. **広告を実際に有効化する前に** AdSense → **Privacy & messaging** で対象地域の同意メッセージを作成・公開します。EEA・英国・スイス向けにはGoogle認定CMPを使用します。Google CMPまたは認定CMPを使い、独自の地域推測・同意バナーは追加しません。別オリジンiframe内でCMPメッセージが適切に表示・操作できるかを実機で検証し、表示できなければ広告を有効化しないでください。
 
-財務省の[製造たばこ小売定価認可情報](https://www.mof.go.jp/policy/tab_salt/topics/kouriteika.html)を主ソースとし、メーカー・輸入業者・製造国で対象を制限しません。紙巻き・加熱式が対象です。葉巻、手巻き用の葉、パイプ用、かぎたばこ等は「1本」の価格に換算できないため対象外です。
+設定値は公開情報です。秘密鍵やAPIトークンは不要です。ID未設定、開発時、HTTP/localhost、オフライン、同意設定未完了なら広告を読み込みません。1画面最大1枠で、広告用scriptは同じフレームで重複追加しません。
 
-公開されている過去の認可PDFを遡って解析します。商品ごとに正式名称、検索別名、価格、入り数、適用日、価格履歴、出典URL、確認日、販売状態を保持。英字・カタカナの別名、全半角・大文字小文字・ひらがな・部分一致で検索できます。別名は確認できる主要ブランドを登録しており、すべての銘柄に英字別名があるとは限りません。
+参照：[Google Privacy & messaging](https://support.google.com/adsense/answer/10924669?hl=ja) / [認定CMPの要件](https://support.google.com/adsense/answer/13554020?hl=ja)
 
-認可は販売継続の証明ではありません。認可資料だけで確認できた商品は **認可価格・販売状況未確認** と表示します。メーカー・輸入者が資料に書かれていなければ「不明」やnullを保存します。終売を一覧から消えたことだけで推測しません。確認不能・解析不能な商品は既存データを維持し、未掲載商品は手動登録できます。
+## 時間帯統計・風景・シェア
 
-商品更新のローカル実行にはPython 3.11以上とPDF解析用ライブラリも必要です（アプリの利用には不要）。
+`src/patterns.js` は両種の記録を1時間ごとに集計します。今週は月曜から。3時間窓の合計・中心時間の記録数でピークを判定し、8件未満または累計/今週で3日未満なら断定しません。24本の棒はタップとキーボード操作に対応します。
 
-```sh
-python -m pip install -r scripts/requirements-catalog.txt
-python -m unittest discover -s tests -p '*_test.py'
-npm run update:products
-```
+`src/world.js` と `src/landscape.js` がホームとPNGに共通です。20本ではまだ黄ばみ、300〜500本まで大きく色が変わり、その後も透明感が増します。600本で若木、1800〜5400本では奥の森と両岸の花畑が成長します。医療上の回復測定ではありません。寿命換算は `public/config.json` の `lifeMinutesPerStick: 20`、初期自由時間は `defaultFreeMinutes: 5`。
 
-`PYTHON` 環境変数でPython実行ファイルを指定できます。初期の収録対象期間・解析数・保留件数は `public/data/catalog-coverage.json` にあります。結合セルなどで商品名・価格を確実に結び付けられない行は保留し、推測登録しません。公式ページの構造変更には解析コードの保守が必要です。完全な全銘柄網羅と終売の完全自動検出は保証できません。
+PNGは1080×1350。今日・累計で数字を切り替え、風景はどちらも現在の累計を使います。銘柄や喫煙日時は含めません。Web Share API非対応時は保存・コピーに切り替わります。Xボタンは投稿画面を開くだけで自動投稿しません。InstagramのURLはストーリーズのリンクスタンプ等へ貼り付けます。
 
-価格適用日が分かる改定は履歴に追加し、未来の価格を早く適用しません。日付が不明なメーカー現行価格はnullとして保存します。過去の「吸わなかった」記録は再計算しません。例えば30円で100本、31円で100本なら合計6,100円のままです。
+## 保存・PWA・テスト
 
-## 今日・累計のシェア
+IndexedDB主保存、対応端末ではOPFS3世代バックアップ。Cache APIはアプリ本体だけ。Persistent Storage非対応でも動作します。全削除は記録と設定・バックアップを消し、広告の静的設定やPWAファイルは維持します。
 
-ホームに「今日の成果をシェア」「今までの成果をシェア」を横並びで配置。それぞれ今日・累計が選ばれた画面を開き、画面内でも期間を切り替えられます。選択した期間の本数・金額・寿命換算・自由時間が画像と投稿文に反映されます。画像は端末内で生成し、銘柄・時刻・履歴は含めません。
+- `npm test`：計算・保存・商品解析・時間帯統計・移行・広告設定の単体テスト
+- `npm run build`：Cloudflare用完全静的ファイルをdistへ生成
+- `npx playwright install chromium`（初回のみ）→ `npm run test:e2e`
+- Python 3.12以上：`python -m pip install -r scripts/requirements-catalog.txt` → `python -m unittest discover -s tests -p '*_test.py'`
 
-「画像とリンクをシェア」でスマホの共有メニューを開き、X・Instagram・LINEなど端末にある共有先を選びます。共有先によって文章やURLが受け取られない場合もあるため、投稿文・URLのコピーボタンと画像保存を用意しています。コピーが使えない環境では選択可能な文章を表示します。
+ブラウザテストは隔離したテスト用データを使います。実ユーザーの記録は変更しません。iPhone/AndroidはChromiumでの画面・タッチ環境の模擬です。実機Safariのホーム画面追加や各SNSアプリでの共有、実際のGoogle広告・CMPは別途確認が必要です。
 
-「Xに投稿する」は投稿文とアプリURLの入った投稿画面を開きます。画像の自動添付は行えないため、必要なら「画像を保存」して投稿画面に添付してください。実際の投稿は利用者が投稿先で確認して行います。
-
-Instagramのリンクは「URLをコピー」してストーリーズのリンクスタンプなどへ貼り付けてください。Webアプリから投稿文・クリック可能なリンクをすべてのInstagram画面へ自動設定できるわけではありません。
-
-公開URLはHTTPSで公開されたアプリの場所から自動で作ります。`localhost`などローカルの確認用URLはシェアしません。公開前は画像・投稿文のみ使え、URL付きの機能は公開後に有効になります。独自ドメインなど固定URLを指定したい場合だけ `public/config.json` の `publicUrl` にHTTPSのアプリURLを設定してください。検索パラメータ・画面内の位置・ユーザー情報はURLに含めません。
-
-## 計算と世界の色
-
-寿命換算は `public/config.json` の `lifeMinutesPerStick`（初期20分）。自由時間は初期5分、設定で3/5/7/10分または1〜120分を選択できます。両方とも記録時に値を保存し、設定変更後も過去分は変えません。小数単価は保持し、表示時のみ小数2桁に丸めます。
-
-寿命換算は[Jacksonらの研究（2025）](https://discovery.ucl.ac.uk/id/eprint/10203237/)を参考にした集団平均の目安です。個人の寿命がその分延びることは保証しません。加熱式にも共通の成果指標として適用していますが、加熱式の1本の健康影響を20分と示した研究ではありません。画面内の情報ボタンでも説明しています。
-
-景色は守った20本＝1日相当、30日＝1か月相当として換算します。WHO・NHSの禁煙後の一般的な変化を参考にした視覚演出であり、実際の禁煙日数や身体の回復度ではありません。20分・8時間・1〜3日・2週間相当の節目を連続的に補間し、初期に黄ばみが抜けます。木・花・草は1か月相当（600本）以降に育ち始め、9か月相当（5,400本）にかけて密度を増し、その後も緩やかに成長します。ルールは src/world.js、植物の配置・成長は src/landscape.js で変更できます。「吸った」は色にも成果にも影響しません。節目は設定ファイルで変更可能。端末の「視差効果を減らす」などReduce Motion設定を尊重します。
-
-起動時メッセージは端末内の時刻・時間帯・曜日・喫煙間隔を参照する単純なスコアです。医療的な欲求予測ではなく、データが少ない間は控えめな時間条件で表示します。通知・外部AIは使用しません。
-
-## 保存・バックアップ・復旧
-
-**IndexedDB**（ブラウザ内のデータベース）に記録と設定を保存。Cache APIはアプリ本体の静的ファイル専用です。記録はCache APIに入れません。
-
-変更後は **OPFS**（同じサイト専用の端末内ファイル領域）にもチェックサム付きスナップショットを最大3世代保存します。書き終えた新世代を検証してから古い世代を削除。起動時にDBの中身が壊れているか見つからない場合、整合性が確認できる最新のバックアップを復元します。壊れたデータを正常なバックアップへ上書きしません。Web Locks対応環境では複数タブの更新・削除を直列化します。
-
-OPFS非対応・容量不足では主DB保存を継続し、設定のデータ状態で表示します。Persistent Storage（ブラウザによる自動消去を抑える保存保護）も対応環境で要求しますが、許可は保証されません。
-
-**OPFSは別端末・クラウドのバックアップではありません。** ブラウザの「サイトデータ削除」、OSの消去、端末紛失でDBとバックアップが一緒に失われます。設定からJSONファイルを書き出せますが、v1ではファイル取り込み画面はありません。ホスト名を変えると保存領域も別になるため、アプリ本体を移転できても端末記録は自動移行しません。
-
-## 完全削除
-
-設定 →「すべての記録を削除」→最終確認で、アプリのOPFSバックアップとIndexedDBを削除し、初回設定へ戻ります。設定・銘柄・記録・回復度も削除されます。静的アプリキャッシュは残してオフライン起動を維持します。書き出し済みのファイルや他のアプリへ共有した画像は削除できません。
-
-## 既知の制限・公開前の確認
-
-- 全銘柄の網羅、現在の販売継続、終売の完全な自動確認には未対応。複雑な公式PDFの曖昧な行は保留します。
-- 初期認可資料の対象は財務省の現行一覧から辿れる公開範囲です。現在の一覧にない古い資料は収録していません。
-- GitHub上のActionsによるビルド・自動テスト・Pages公開は確認済み。実機iPhone Safari / Androidへのインストールは未検証。公開後に上記PWA手順で確認してください。
-- ユーザーデータの保存はサイトとブラウザに紐付きます。プライベートブラウズでの長期保存は推奨しません。
-- 記録の編集・取消・外部ファイルからの取り込みはv1ではありません。意図的なタップは1回ごとに記録されます。
-- バックアップは全体スナップショット方式。通常の個人利用を想定し、非常に大量の履歴は未検証です。
-- タイムゾーン・端末時計が変更された場合でも、過去の「今日」は記録時の日付を維持します。
-- アイコンは自作SVGとビルド時生成PNG。市販商品のロゴや写真は使用しません。
-
-初期実装の検証内容は `VERIFICATION.md` を参照してください。
-
-花畑は最終的に小川の両岸を覆う密度まで育ちます。水は青く澄み、3か月相当を過ぎると魚が現れます。魚の動きは端末の「動きを減らす」設定に従います。
-
-公開URL：https://aitekitou58-svg.github.io/yani-wars/
-
-公開先の新規ブラウザで記録・累計シェア画像・オフライン再起動を確認済みです。localhostの記録は公開サイトへ自動移行しません。
+説明ページはJSなしでも読める静的HTMLです。`scripts/information.mjs` から `/about/`、`/guide/`、`/life/`、`/patterns/`、`/privacy/`、`/advertising/` を生成します。Service Workerはこれらもオフライン対応します。新バージョンは全タブを閉じた後に切り替わり、古い画面を途中で壊しません。
