@@ -34,7 +34,7 @@ export function mountAd(container, config, slot, production) {
   const unit = document.createElement('ins'); unit.className = 'adsbygoogle';
   unit.style.display = 'block'; unit.style.minHeight = '100px';
   unit.dataset.adClient = a.client; unit.dataset.adSlot = a.slot;
-  if (slot === 'slotHome') {
+  if (['slotHome','slotRecord'].includes(slot)) {
     // Google-approved expandable width / fixed-height responsive code.
     Object.assign(unit.style, {minWidth:'120px', maxWidth:'970px', width:'100%', height:'100px'});
   } else { unit.dataset.adFormat = 'auto'; unit.dataset.fullWidthResponsive = 'true'; }
@@ -55,19 +55,19 @@ export function mountAd(container, config, slot, production) {
 }
 
 // Keep the vendor DOM outside the frequently rerendered app. No timer refreshes.
-export function positionHomeAd(config, production) {
-  let banner = document.querySelector('#home-banner');
-  const anchor = document.querySelector('#home-ad-anchor');
-  if (!anchor || !adSettings(config, 'slotHome', window.location, production)) {
+function positionBanner(config, slot, production, anchorId, bannerId) {
+  let banner = document.querySelector('#' + bannerId);
+  const anchor = document.querySelector('#' + anchorId);
+  if (!anchor || !adSettings(config, slot, window.location, production)) {
     if (banner) banner.hidden = true;
     return;
   }
   if (!banner) {
-    banner = document.createElement('aside'); banner.id = 'home-banner';
+    banner = document.createElement('aside'); banner.id = bannerId;
     banner.setAttribute('aria-label', '広告'); document.body.append(banner);
     banner.style.position = 'absolute';
     const position = () => {
-      const target = document.querySelector('#home-ad-anchor');
+      const target = document.querySelector('#' + anchorId);
       if (!target || !banner.childElementCount) { banner.hidden = true; if(target) { target.style.height='0px'; target.style.marginTop='0px'; } return; }
       banner.hidden = false;
       const rect = target.getBoundingClientRect();
@@ -84,6 +84,11 @@ export function positionHomeAd(config, production) {
   banner.hidden = false;
   const bounds = anchor.getBoundingClientRect();
   banner.style.width = `${bounds.width}px`;
-  mountAd(banner, config, 'slotHome', production);
+  mountAd(banner, config, slot, production);
   requestAnimationFrame(banner.reposition);
+}
+
+export function positionHomeAd(config, production) {
+  positionBanner(config, 'slotHome', production, 'home-ad-anchor', 'home-banner');
+  positionBanner(config, 'slotRecord', production, 'record-ad', 'record-banner');
 }
