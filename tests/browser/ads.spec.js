@@ -61,3 +61,35 @@ test('real home places stable banner below world copy without sharing records', 
   expect(requests).toBe(1);
   await expect(page.locator('#record-banner')).toBeHidden();
 });
+
+test('production ownership code loads in head once without a display slot or record inputs',async({page})=>{
+  let requests=0;
+  await page.route('**/*',async route=>{
+    const u=new URL(route.request().url());
+    if(u.hostname==='pagead2.googlesyndication.com') {
+      requests++;expect(u.searchParams.get('client')).toBe('ca-pub-8745360624658964');
+      expect([...u.searchParams.keys()]).toEqual(['client']);
+      return route.fulfill({contentType:'text/javascript',body:'window.adsbygoogle={push(){}};'});
+    }
+    if(u.hostname!=='yaniwars.pages.dev')return route.abort();
+    const file=u.pathname==='/'?'index.html':u.pathname.slice(1);
+    const types={'.js':'text/javascript','.css':'text/css','.json':'application/json','.html':'text/html','.svg':'image/svg+xml','.png':'image/png'};
+    return route.fulfill({body:await readFile(path.join('dist',file)),contentType:types[path.extname(file)]||'text/plain'});
+  });
+  await page.goto('https://yaniwars.pages.dev/');
+  await expect(page.locator('head script[data-google-ads]')).toHaveAttribute('data-loaded','true');
+  await expect(page.locator('head meta[name=google-adsense-account]')).toHaveAttribute('content','ca-pub-8745360624658964');
+  await page.locator('[data-product]').first().click();await page.locator('#start').click();
+  await page.locator('#save').click();await expect(page.locator('#today-count')).toHaveText('1');
+  await page.locator('[data-view=history]').click();await page.locator('[data-view=settings]').click();
+  await expect(page.locator('ins.adsbygoogle')).toHaveCount(0);
+  expect(requests).toBe(1);
+  await page.evaluate(async()=>{
+    const {mountAd}=await import('/src/ads.js');
+    const container=document.createElement('aside');document.body.append(container);
+    mountAd(container,{adsense:{enabled:true,consentConfigured:true,clientId:'ca-pub-8745360624658964',slotInfo:'1234567890'}},'slotInfo',true);
+  });
+  await expect(page.locator('ins.adsbygoogle')).toHaveCount(1);
+  await expect(page.locator('script[data-google-ads]')).toHaveCount(1);
+  expect(requests).toBe(1);
+});
