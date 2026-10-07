@@ -1,7 +1,7 @@
+import { positionHomeAd } from "./ads.js";
+import { production } from "./build-mode.js";
 import { mergeRecords } from "./transfer.js";
 import { hourlyPattern } from "./patterns.js";
-import { mountAd } from "./ads.js";
-import { production } from "./build-mode.js";
 import {
   dayKey,
   totals,
@@ -81,13 +81,14 @@ function render() {
   theme();
   if (!state.settings) {
     onboarding();
+    positionHomeAd(config, production);
     return;
   }
   const total = totals(state.events),
     today = totals(state.events, "today");
-  app.innerHTML = `<div class="shell">${header()}<main>${view === "home" ? `<section class="home"><div class="heading"><p class="eyebrow">ONE LESS. MORE LIFE.</p><h1>お前には、<br>もう奪わせない。</h1><p class="quiet">${launchMessage || "その1本から、取り戻そう。"}</p></div>${scene()}<div class="count-line"><span>今日守った <strong id="today-count">${today.count}</strong> 本</span><span>累計 <b>${total.count}</b> 本</span></div><div class="action-area"><button class="save-button" id="save">吸わなかった！<span aria-hidden="true">＋</span></button><button class="smoked" id="smoked">吸った</button></div><section class="reclaimed" aria-label="累計の成果">${stats(total)}</section><div class="share-actions" role="group" aria-label="成果をシェア"><button class="share-link" data-action="share"><span>今日の成果をシェア</span><span aria-hidden="true">↗</span></button><button class="share-link" data-action="share-all"><span>今までの成果をシェア</span><span aria-hidden="true">↗</span></button></div><p class="world-copy">奪われていたものを取り戻すほど、<br>世界に色が戻る。</p></section>` : view === "history" ? history() : settings()}</main>${nav()}</div>`;
+  app.innerHTML = `<div class="shell">${header()}<main>${view === "home" ? `<section class="home"><div class="heading"><p class="eyebrow">ONE LESS. MORE LIFE.</p><h1>お前には、<br>もう奪わせない。</h1><p class="quiet">${launchMessage || "その1本から、取り戻そう。"}</p></div>${scene()}<div class="count-line"><span>今日守った <strong id="today-count">${today.count}</strong> 本</span><span>累計 <b>${total.count}</b> 本</span></div><div class="action-area"><button class="save-button" id="save">吸わなかった！<span aria-hidden="true">＋</span></button><button class="smoked" id="smoked">吸った</button></div><section class="reclaimed" aria-label="累計の成果">${stats(total)}</section><div class="share-actions" role="group" aria-label="成果をシェア"><button class="share-link" data-action="share"><span>今日の成果をシェア</span><span aria-hidden="true">↗</span></button><button class="share-link" data-action="share-all"><span>今までの成果をシェア</span><span aria-hidden="true">↗</span></button></div><p class="world-copy">奪われていたものを取り戻すほど、<br>世界に色が戻る。</p><div id="home-ad-anchor"></div></section>` : view === "history" ? history() : settings()}</main>${nav()}</div>`;
   bind();
-  mountAd($("#record-ad"), config, "slotRecord", production);
+  positionHomeAd(config, production);
 }
 function patternChart() {
   const p = hourlyPattern(state.events, period), max = Math.max(1, ...p.hours);

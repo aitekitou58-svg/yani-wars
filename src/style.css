@@ -839,3 +839,9 @@ dialog a {
 
 .import-records {display:block;margin:24px 0;font-size:13px;}
 .import-records input {display:block;max-width:100%;font-size:12px;margin-top:10px;}
+
+#home-banner.advert { margin:0; padding:12px 0; overflow:hidden; }
+#home-banner[hidden] { display:none; }
+
+#home-banner > p { font-size:10px; line-height:1.5; margin:0 0 8px; opacity:.65; }
+#home-banner ins { text-decoration:none; }
