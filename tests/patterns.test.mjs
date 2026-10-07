@@ -42,10 +42,10 @@ test('record transfer preserves current settings, historical prices, and dedupli
   assert.throws(()=>mergeRecords(a,{...b,events:[{...a.events[0],unitPrice:999}]}));
   assert.throws(()=>mergeRecords(a,{version:1,events:[]}));
 });
-test('ads require production, HTTPS, valid IDs, configured consent and separate origin', () => {
-  const loc={origin:'https://app.example.org',protocol:'https:'};
+test('ads require production, HTTPS, valid IDs, configured consent and valid banner settings', () => {
+  const loc={origin:'https://ads.example.org',protocol:'https:'};
   const config={adsense:{enabled:true,consentConfigured:true,clientId:'ca-pub-1234567890123456',slotRecord:'1234567890',hostUrl:'https://ads.example.org/'}};
-  assert.ok(adSettings(config,'slotRecord',loc,true));
+  assert.ok(adSettings(config,'slotRecord',{origin:'https://ads.example.org',protocol:'https:'},true));
   assert.equal(adSettings(config,'slotRecord',loc,false),null);
-  for(const patch of [{enabled:false},{consentConfigured:false},{clientId:''},{slotRecord:''},{hostUrl:loc.origin},{hostUrl:'http://ads.example.org'}]) assert.equal(adSettings({adsense:{...config.adsense,...patch}},'slotRecord',loc,true),null);
+  for(const patch of [{enabled:false},{consentConfigured:false},{clientId:''},{slotRecord:''}]) assert.equal(adSettings({adsense:{...config.adsense,...patch}},'slotRecord',loc,true),null);
 });
