@@ -1,11 +1,11 @@
 {
   "index": "https://www.mof.go.jp/policy/tab_salt/topics/kouriteika.html",
-  "documents": 280,
-  "parsed": 280,
-  "acceptedRows": 357,
+  "documents": 283,
+  "parsed": 283,
+  "acceptedRows": 358,
   "quarantinedRows": 225,
   "oldest": "https://www.mof.go.jp/policy/tab_salt/20231010_kouriteika.pdf",
-  "newest": "https://www.mof.go.jp/policy/tab_salt/topics/20261002_kouriteikahenkou.pdf",
+  "newest": "https://www.mof.go.jp/policy/tab_salt/topics/20261007_kouriteikahenkou.pdf",
   "limitations": [
     "過去資料には販売終了済み商品も含まれます。販売状態 approved は価格認可済み・販売継続未確認です。",
     "認可表にメーカー・輸入者の記載がない場合は推測しません。",

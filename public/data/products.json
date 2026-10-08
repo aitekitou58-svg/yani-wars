@@ -1,6 +1,6 @@
 {
-  "version": 5,
-  "checkedAt": "2026-10-07",
+  "version": 6,
+  "checkedAt": "2026-10-09",
   "coverage": "財務省公開認可資料の紙巻き・加熱式とメーカー公式表。認可は現行販売を保証しません。曖昧な結合セルは保留。輸入者・製造者の記載がない場合は不明。",
   "products": [
     {
@@ -12530,6 +12530,44 @@
         "マイルドセブン"
       ],
       "importer": null
+    },
+    {
+      "id": "mof-820a902419720046",
+      "name": "テリア・インテンス・レギュラー",
+      "manufacturer": "不明（認可資料に記載なし）",
+      "importer": null,
+      "category": "IQOS",
+      "type": "加熱式",
+      "packPrice": 640,
+      "count": 20,
+      "unitPrice": 32,
+      "effectiveFrom": null,
+      "status": "approved",
+      "sources": [
+        "https://www.mof.go.jp/policy/tab_salt/topics/20261006_kouriteika.pdf"
+      ],
+      "verifiedAt": "2026-10-09",
+      "approvedAt": "2026-10-06",
+      "countries": [
+        "イタリア",
+        "ギリシャ"
+      ],
+      "aliases": [
+        "テリア・インテンス・レギュラー",
+        "テリア",
+        "TEREA",
+        "IQOS",
+        "アイコス"
+      ],
+      "prices": [
+        {
+          "packPrice": 640,
+          "count": 20,
+          "effectiveFrom": null,
+          "approvedAt": "2026-10-06",
+          "source": "https://www.mof.go.jp/policy/tab_salt/topics/20261006_kouriteika.pdf"
+        }
+      ]
     }
   ]
 }
