@@ -1,6 +1,6 @@
 {
-  "version": 6,
-  "checkedAt": "2026-10-09",
+  "version": 7,
+  "checkedAt": "2026-10-20",
   "coverage": "財務省公開認可資料の紙巻き・加熱式とメーカー公式表。認可は現行販売を保証しません。曖昧な結合セルは保留。輸入者・製造者の記載がない場合は不明。",
   "products": [
     {
@@ -12566,6 +12566,138 @@
           "effectiveFrom": null,
           "approvedAt": "2026-10-06",
           "source": "https://www.mof.go.jp/policy/tab_salt/topics/20261006_kouriteika.pdf"
+        }
+      ]
+    },
+    {
+      "id": "mof-2e93796da019847e",
+      "name": "ピール ライムコーラ スーパースリム",
+      "manufacturer": "不明（認可資料に記載なし）",
+      "importer": null,
+      "category": "紙巻き",
+      "type": "紙巻き",
+      "packPrice": 570,
+      "count": 20,
+      "unitPrice": 28.5,
+      "effectiveFrom": null,
+      "status": "approved",
+      "sources": [
+        "https://www.mof.go.jp/policy/tab_salt/topics/20261016_kouriteika.pdf"
+      ],
+      "verifiedAt": "2026-10-20",
+      "approvedAt": "2026-10-16",
+      "countries": [
+        "アラブ首長国連邦"
+      ],
+      "aliases": [
+        "ピール ライムコーラ スーパースリム"
+      ],
+      "prices": [
+        {
+          "packPrice": 570,
+          "count": 20,
+          "effectiveFrom": null,
+          "approvedAt": "2026-10-16",
+          "source": "https://www.mof.go.jp/policy/tab_salt/topics/20261016_kouriteika.pdf"
+        }
+      ]
+    },
+    {
+      "id": "mof-6c9ffdda3ddfc953",
+      "name": "オヤ・スリム・エクストリーム・メンソールラッシュ",
+      "manufacturer": "不明（認可資料に記載なし）",
+      "importer": null,
+      "category": "紙巻き",
+      "type": "紙巻き",
+      "packPrice": 590,
+      "count": 20,
+      "unitPrice": 29.5,
+      "effectiveFrom": null,
+      "status": "approved",
+      "sources": [
+        "https://www.mof.go.jp/policy/tab_salt/topics/20261016_kouriteika.pdf"
+      ],
+      "verifiedAt": "2026-10-20",
+      "approvedAt": "2026-10-16",
+      "countries": [
+        "アラブ首長国連邦"
+      ],
+      "aliases": [
+        "オヤ・スリム・エクストリーム・メンソールラッシュ"
+      ],
+      "prices": [
+        {
+          "packPrice": 590,
+          "count": 20,
+          "effectiveFrom": null,
+          "approvedAt": "2026-10-16",
+          "source": "https://www.mof.go.jp/policy/tab_salt/topics/20261016_kouriteika.pdf"
+        }
+      ]
+    },
+    {
+      "id": "mof-f4bc8af6b51f74c8",
+      "name": "オヤ・スリム・リモンチェッロ・メンソール",
+      "manufacturer": "不明（認可資料に記載なし）",
+      "importer": null,
+      "category": "紙巻き",
+      "type": "紙巻き",
+      "packPrice": 590,
+      "count": 20,
+      "unitPrice": 29.5,
+      "effectiveFrom": null,
+      "status": "approved",
+      "sources": [
+        "https://www.mof.go.jp/policy/tab_salt/topics/20261016_kouriteika.pdf"
+      ],
+      "verifiedAt": "2026-10-20",
+      "approvedAt": "2026-10-16",
+      "countries": [
+        "アラブ首長国連邦"
+      ],
+      "aliases": [
+        "オヤ・スリム・リモンチェッロ・メンソール"
+      ],
+      "prices": [
+        {
+          "packPrice": 590,
+          "count": 20,
+          "effectiveFrom": null,
+          "approvedAt": "2026-10-16",
+          "source": "https://www.mof.go.jp/policy/tab_salt/topics/20261016_kouriteika.pdf"
+        }
+      ]
+    },
+    {
+      "id": "mof-7df1b9e0b86d9908",
+      "name": "オヤ・スリム・メロン・メンソール",
+      "manufacturer": "不明（認可資料に記載なし）",
+      "importer": null,
+      "category": "紙巻き",
+      "type": "紙巻き",
+      "packPrice": 590,
+      "count": 20,
+      "unitPrice": 29.5,
+      "effectiveFrom": null,
+      "status": "approved",
+      "sources": [
+        "https://www.mof.go.jp/policy/tab_salt/topics/20261016_kouriteika.pdf"
+      ],
+      "verifiedAt": "2026-10-20",
+      "approvedAt": "2026-10-16",
+      "countries": [
+        "アラブ首長国連邦"
+      ],
+      "aliases": [
+        "オヤ・スリム・メロン・メンソール"
+      ],
+      "prices": [
+        {
+          "packPrice": 590,
+          "count": 20,
+          "effectiveFrom": null,
+          "approvedAt": "2026-10-16",
+          "source": "https://www.mof.go.jp/policy/tab_salt/topics/20261016_kouriteika.pdf"
         }
       ]
     }
